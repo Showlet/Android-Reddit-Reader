@@ -34,7 +34,7 @@ public class Fetcher  extends AsyncTask<String, Void, String>
     @Override
     protected String doInBackground(String ... params) {
         try {
-            //Prepare the connection
+            // Prépare la connection
             HttpsURLConnection conn = (HttpsURLConnection) new URL(params[0]).openConnection();
             conn.setRequestMethod("GET");
             conn.setDoOutput(false);
@@ -42,7 +42,7 @@ public class Fetcher  extends AsyncTask<String, Void, String>
             conn.setUseCaches(false);
             conn.setChunkedStreamingMode(0);
 
-            // Starts the query
+            // Commence la query
             conn.connect();
 
             //Get input stream
