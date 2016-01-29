@@ -14,18 +14,21 @@ import java.util.List;
 /**
  * Created by vincent on 2016-01-28.
  */
-public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder>{
+public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder> {
 
     private List<FrontPage.Data.Children> _LstPost;
 
-    public PostAdapter(List<FrontPage.Data.Children> lstMessage)
-    {
+    public PostAdapter(List<FrontPage.Data.Children> lstMessage) {
         _LstPost = lstMessage;
     }
 
     @Override
     public int getItemCount() {
         return _LstPost.size();
+    }
+
+    public FrontPage.Data.Children.Post getItem(int pos) {
+        return _LstPost.get(pos).data;
     }
 
     @Override
@@ -39,17 +42,16 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
     public void onBindViewHolder(PostViewHolder holder, int position) {
         FrontPage.Data.Children post = _LstPost.get(position);
         holder.tvTitle.setText(post.data.title);
-        holder.tvSubreddit.setText(post.data.subreddit);
-        holder.tvUser.setText(post.data.author);
+        holder.tvSubreddit.setText("/r/" + post.data.subreddit);
 
         holder.imgImage.setImageBitmap(null);
         holder.imgImage.setBackground(null);
         holder.imgImage.setBackgroundResource(R.drawable.defaultimg);
 
-        String urlpreview =  null;
+        String urlpreview = null;
 
-        if(post.data.preview !=null )
-            if(post.data.preview.images.size() >= 1)
+        if (post.data.preview != null)
+            if (post.data.preview.images.size() >= 1)
                 urlpreview = post.data.preview.images.get(0).source.url;
 
         new ImageLoader(holder.imgImage, R.drawable.defaultimg).execute(urlpreview);
@@ -66,7 +68,6 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
             tvTitle = (TextView) v.findViewById(R.id.txtPostTitle);
             tvSubreddit = (TextView) v.findViewById(R.id.txtPostSubreddit);
             imgImage = (ImageView) v.findViewById(R.id.imgPostMedia);
-            tvUser = (TextView) v.findViewById(R.id.txtPostUser);
         }
     }
 }

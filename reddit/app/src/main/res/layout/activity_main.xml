@@ -3,19 +3,23 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
+    android:orientation="horizontal"
     tools:context="com.example.reddit.MainActivity">
 
-    <android.support.v4.widget.SwipeRefreshLayout
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/recyclelist_post"
+        android:layout_width="358dp"
+        android:layout_height="wrap_content"/>
+
+    <WebView
         android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/WebView" />
+
+    <android.support.v4.widget.SwipeRefreshLayout
+        android:layout_width="308dp"
         android:id="@+id/swipe_user"
         android:layout_height="match_parent">
-
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/recyclelist_post"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="#e1efea" />
 
     </android.support.v4.widget.SwipeRefreshLayout>
 
