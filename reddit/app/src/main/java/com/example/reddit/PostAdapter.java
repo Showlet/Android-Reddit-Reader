@@ -7,9 +7,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
+import com.example.reddit.utilities.ImageLoader;
 
 import java.util.List;
+
+import static java.security.AccessController.getContext;
 
 /**
  * Created by vincent on 2016-01-28.
@@ -52,7 +56,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
             if(post.data.preview.images.size() >= 1)
                 urlpreview = post.data.preview.images.get(0).source.url;
 
-        new ImageLoader(holder.imgImage, R.drawable.defaultimg).execute(urlpreview);
+        new com.example.reddit.utilities.ImageLoader(holder.imgImage,holder.progressBar,R.drawable.ic_action_alert_warning).execute(urlpreview);
     }
 
     public static class PostViewHolder extends RecyclerView.ViewHolder {
@@ -60,6 +64,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
         protected TextView tvSubreddit;
         protected ImageView imgImage;
         protected TextView tvUser;
+        protected ProgressBar progressBar;
 
         public PostViewHolder(View v) {
             super(v);
@@ -67,6 +72,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
             tvSubreddit = (TextView) v.findViewById(R.id.txtPostSubreddit);
             imgImage = (ImageView) v.findViewById(R.id.imgPostMedia);
             tvUser = (TextView) v.findViewById(R.id.txtPostUser);
+            progressBar = (ProgressBar) v.findViewById(R.id.imgProgress);
         }
     }
 }
