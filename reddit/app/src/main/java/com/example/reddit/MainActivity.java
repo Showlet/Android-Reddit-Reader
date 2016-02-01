@@ -53,7 +53,7 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
 
     /**
      *
-     * Ã€ la crÃ©ation de l'activitÃ© (NO SHIT)
+     * À la création de l'activité (NO SHIT)
      *
      * @param savedInstanceState
      */
@@ -96,7 +96,7 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
 
     /**
      *
-     * AprÃ¨s la crÃ©ation de l'activitÃ© (NO SHIT)
+     * Après la création de l'activité (NO SHIT)
      *
      * @param savedInstanceState
      */
@@ -104,28 +104,28 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
     protected void onPostCreate(Bundle savedInstanceState){
         super.onPostCreate(savedInstanceState);
 
-        //On synchronise l'Ã©tat (ouvert/fermÃ©) du drawer
+        //On synchronise l'état (ouvert/fermé) du drawer
         mActionBarDrawerToggleToggle.syncState();
     }
 
     /**
      *
-     * Ã€ la crÃ©ation des options du menu (Toolbar) (NO SHIT)
+     * À la création des options du menu (Toolbar) (NO SHIT)
      *
      * @param menu
      * @return super.onCreateOptionsMenu(menu)
      */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // On inflate le menu. Si l'action bar est prÃ©sente, on va rajouter les items
+        // On inflate le menu. Si l'action bar est présente, on va rajouter les items
         getMenuInflater().inflate(R.menu.action_bar_menu, menu);
         mSearchAction = menu.findItem(R.id.action_search);
         return super.onCreateOptionsMenu(menu);
     }
 
     /**
-     * Ã€ la sÃ©lection d'un item du menu (NO SHIT)
-     * @param item l'item sÃ©lectionnÃ©
+     * À la sélection d'un item du menu (NO SHIT)
+     * @param item l'item sélectionné
      * @return super.onOptionsItemSelected(item)
      */
     @Override
@@ -153,7 +153,7 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
 
     /**
      *
-     * Initialise la toolbar. Elle est ajoutÃ©e et attachÃ©e au layout
+     * Initialise la toolbar. Elle est ajoutée et attachée au layout
      *
      */
     private void InitialiserToolbar()
@@ -171,7 +171,7 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
      */
     private void InitialiserDrawer()  {
 
-        //On va gÃ©rer sa diffÃ©rament c'est juste pour tester.
+        //On va gérer sa différament c'est juste pour tester.
         List<DrawerItem> drawerMenuItem = new ArrayList<DrawerItem>();
         drawerMenuItem.add(new DrawerItem("/r Subreddit 1","https://www.reddit.com/hot.json",R.drawable.ic_action_trending_up));
         drawerMenuItem.add(new DrawerItem("/r Subreddit 2","https://www.reddit.com/hot.json",R.drawable.ic_action_trending_up));
@@ -180,16 +180,16 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
         drawerMenuItem.add(new DrawerItem("/r Subreddit 5","https://www.reddit.com/hot.json",R.drawable.ic_action_trending_up));
 
 
-        //On assigne le recycler Ã  la vue,
+        //On assigne le recycler à la vue,
         mDrawerRecyclerView = (RecyclerView) findViewById(R.id.DrawerRecycler);
         //La liste d'objet est de taille fixe. (On va peut-etre changer sa avec les favoris)
         mDrawerRecyclerView.setHasFixedSize(true);
 
-        //CrÃ©ation de l'adapteur.
+        //Création de l'adapteur.
         mDrawerAdapter = new DrawerAdapter("MaxVerro",R.drawable.avatar,drawerMenuItem,this);
         mDrawerRecyclerView.setAdapter(mDrawerAdapter);
 
-        //CrÃ©ation du layout manager pour gÃ©rer le drawer
+        //Création du layout manager pour gérer le drawer
         mDrawerLayoutManager = new LinearLayoutManager(this);
         mDrawerRecyclerView.setLayoutManager(mDrawerLayoutManager);
 
@@ -229,19 +229,19 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
 
     /**
      *
-     * Permets de gÃ©rer la sÃ©lection des items du drawer.
+     * Permets de gérer la sélection des items du drawer.
      *
-     * @param position La position sÃ©lectionnÃ©
+     * @param position La position sélectionné
      */
     @Override
     public void onDrawerItemSelected(int position) {
 
-        //On ferme le drawer Ã  la sÃ©lection d'un item.
+        //On ferme le drawer à la sélection d'un item.
         if (mDrawerLayout != null) {
             mDrawerLayout.closeDrawer(mDrawerRecyclerView);
         }
 
-        //On gÃ¨re l'item sÃ©lectionnÃ©
+        //On gère l'item sélectionné
         ((DrawerAdapter) mDrawerAdapter).selectPosition(position);
         switch (position)
         {
@@ -269,7 +269,7 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
     }
 
     /**
-     * GÃ¨re les backPressed
+     * Gère les backPressed
      */
     @Override
     public void onBackPressed() {
@@ -284,7 +284,7 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
     }
 
     /**
-     * MÃ©thode qui active l'action de recherche dans la toolbar
+     * Méthode qui active l'action de recherche dans la toolbar
      */
     private void enableSearchMenu() {
         //On retrouve l'action bar
@@ -325,14 +325,14 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
     }
 
     /**
-     * MÃ©thode qui dÃ©sactive l'action de recherche dans la toolbar
+     * Méthode qui désactive l'action de recherche dans la toolbar
      */
     private void disableSearchMenu() {
 
         //On retrouve l'action bar
         ActionBar actionBar = getSupportActionBar();
 
-        //On dÃ©sactive la custom view dans la toolbar et on affiche le titre
+        //On désactive la custom view dans la toolbar et on affiche le titre
         actionBar.setDisplayShowCustomEnabled(false);
         actionBar.setDisplayShowTitleEnabled(true);
 
