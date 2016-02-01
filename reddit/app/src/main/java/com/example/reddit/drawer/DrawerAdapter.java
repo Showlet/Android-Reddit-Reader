@@ -57,6 +57,7 @@ public class DrawerAdapter extends RecyclerView.Adapter<DrawerAdapter.ViewHolder
 
 
 
+
     /**
      *
      * ViewHolder du drawer qui va stocker les views afin de les recycler.
@@ -231,6 +232,11 @@ public class DrawerAdapter extends RecyclerView.Adapter<DrawerAdapter.ViewHolder
         return mDrawerItems.size() + 1;
     }
 
+
+    public DrawerItem getItem(int position)
+    {
+        return mDrawerItems.get(position - 1);
+    }
 
     /**
      *

@@ -12,22 +12,13 @@ import java.net.URL;
 public class DrawerItem {
     private static final String TAG = "DrawerItem";
     private int mResId;
-    private URL mUrl;
+    private String mUrl;
     private String mText;
 
     public DrawerItem(String text,String url, int resId)  {
         mText = text;
-
         mResId = resId;
-
-        try {
-            mUrl = new URL(url);
-        } catch (MalformedURLException e) {
-            Log.d(TAG, "Error while converting string to url.");
-            e.printStackTrace();
-        } finally {
-            mUrl = null;
-        }
+        mUrl = url;
     }
 
     public int getIcon() {
@@ -51,7 +42,7 @@ public class DrawerItem {
      *
      * @return L'url pour accéder au subreddit.
      */
-    public URL getmUrl() {
+    public String getmUrl() {
         return mUrl;
     }
 }

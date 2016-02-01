@@ -23,6 +23,8 @@ import com.example.reddit.drawer.DrawerAdapter;
 import com.example.reddit.drawer.DrawerCallbacks;
 import com.example.reddit.drawer.DrawerItem;
 import com.example.reddit.utilities.CacheManager;
+import com.example.reddit.utilities.FetchCompleted;
+import com.example.reddit.utilities.Fetcher;
 import com.example.reddit.utilities.PreferencesManager;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -50,10 +52,13 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
     private ActionBarDrawerToggle mActionBarDrawerToggleToggle;
     private RecyclerView.LayoutManager mDrawerLayoutManager;
 
+    // DerniereURL utilise
+    private String mCurrentURL;
+
 
     /**
      *
-     * À la création de l'activité (NO SHIT)
+     * ï¿½ la crï¿½ation de l'activitï¿½ (NO SHIT)
      *
      * @param savedInstanceState
      */
@@ -61,6 +66,8 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        mCurrentURL = "https://www.reddit.com/hot.json";
 
         _recyclelst_post = (RecyclerView) findViewById(R.id.recyclelist_post);
         _swipe_layout = (SwipeRefreshLayout) findViewById(R.id.swipe_user);
@@ -75,7 +82,7 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
                 new SwipeRefreshLayout.OnRefreshListener() {
                     @Override
                     public void onRefresh() {
-                        MainActivity.this.startRefresh();
+                        MainActivity.this.startRefresh(mCurrentURL);
                     }
                 }
         );
@@ -91,12 +98,12 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
         //Initialise les composantes de l'interface graphique.
         InitialiserToolbar();
         InitialiserDrawer();
-        startRefresh();
+        startRefresh(mCurrentURL);
     }
 
     /**
      *
-     * Après la création de l'activité (NO SHIT)
+     * Aprï¿½s la crï¿½ation de l'activitï¿½ (NO SHIT)
      *
      * @param savedInstanceState
      */
@@ -104,28 +111,28 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
     protected void onPostCreate(Bundle savedInstanceState){
         super.onPostCreate(savedInstanceState);
 
-        //On synchronise l'état (ouvert/fermé) du drawer
+        //On synchronise l'ï¿½tat (ouvert/fermï¿½) du drawer
         mActionBarDrawerToggleToggle.syncState();
     }
 
     /**
      *
-     * À la création des options du menu (Toolbar) (NO SHIT)
+     * ï¿½ la crï¿½ation des options du menu (Toolbar) (NO SHIT)
      *
      * @param menu
      * @return super.onCreateOptionsMenu(menu)
      */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // On inflate le menu. Si l'action bar est présente, on va rajouter les items
+        // On inflate le menu. Si l'action bar est prï¿½sente, on va rajouter les items
         getMenuInflater().inflate(R.menu.action_bar_menu, menu);
         mSearchAction = menu.findItem(R.id.action_search);
         return super.onCreateOptionsMenu(menu);
     }
 
     /**
-     * À la sélection d'un item du menu (NO SHIT)
-     * @param item l'item sélectionné
+     * ï¿½ la sï¿½lection d'un item du menu (NO SHIT)
+     * @param item l'item sï¿½lectionnï¿½
      * @return super.onOptionsItemSelected(item)
      */
     @Override
@@ -153,7 +160,7 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
 
     /**
      *
-     * Initialise la toolbar. Elle est ajoutée et attachée au layout
+     * Initialise la toolbar. Elle est ajoutï¿½e et attachï¿½e au layout
      *
      */
     private void InitialiserToolbar()
@@ -171,25 +178,26 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
      */
     private void InitialiserDrawer()  {
 
-        //On va gérer sa différament c'est juste pour tester.
+        //On va gï¿½rer sa diffï¿½rament c'est juste pour tester.
         List<DrawerItem> drawerMenuItem = new ArrayList<DrawerItem>();
-        drawerMenuItem.add(new DrawerItem("/r Subreddit 1","https://www.reddit.com/hot.json",R.drawable.ic_action_trending_up));
-        drawerMenuItem.add(new DrawerItem("/r Subreddit 2","https://www.reddit.com/hot.json",R.drawable.ic_action_trending_up));
-        drawerMenuItem.add(new DrawerItem("/r Subreddit 3","https://www.reddit.com/hot.json",R.drawable.ic_action_trending_up));
-        drawerMenuItem.add(new DrawerItem("/r Subreddit 4","https://www.reddit.com/hot.json",R.drawable.ic_action_trending_up));
-        drawerMenuItem.add(new DrawerItem("/r Subreddit 5","https://www.reddit.com/hot.json",R.drawable.ic_action_trending_up));
+        drawerMenuItem.add(new DrawerItem("FrontPage","https://www.reddit.com/hot.json",R.drawable.ic_action_trending_up));
+        drawerMenuItem.add(new DrawerItem("/r/programming","https://www.reddit.com/r/programming.json",R.drawable.ic_action_trending_up));
+        drawerMenuItem.add(new DrawerItem("/r/gonewild","https://www.reddit.com/r/gonewild.json",R.drawable.ic_action_trending_up));
+        drawerMenuItem.add(new DrawerItem("/r/funny","https://www.reddit.com/r/funny.json",R.drawable.ic_action_trending_up));
+        drawerMenuItem.add(new DrawerItem("/r/aww","https://www.reddit.com/r/aww.json",R.drawable.ic_action_trending_up));
+        drawerMenuItem.add(new DrawerItem("/r/ama","https://www.reddit.com/r/ama.json",R.drawable.ic_action_trending_up));
 
 
-        //On assigne le recycler à la vue,
+        //On assigne le recycler ï¿½ la vue,
         mDrawerRecyclerView = (RecyclerView) findViewById(R.id.DrawerRecycler);
         //La liste d'objet est de taille fixe. (On va peut-etre changer sa avec les favoris)
         mDrawerRecyclerView.setHasFixedSize(true);
 
-        //Création de l'adapteur.
+        //Crï¿½ation de l'adapteur.
         mDrawerAdapter = new DrawerAdapter("MaxVerro",R.drawable.avatar,drawerMenuItem,this);
         mDrawerRecyclerView.setAdapter(mDrawerAdapter);
 
-        //Création du layout manager pour gérer le drawer
+        //Crï¿½ation du layout manager pour gï¿½rer le drawer
         mDrawerLayoutManager = new LinearLayoutManager(this);
         mDrawerRecyclerView.setLayoutManager(mDrawerLayoutManager);
 
@@ -201,10 +209,11 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
         mDrawerLayout.setDrawerListener(mActionBarDrawerToggleToggle);
     }
 
-    public void startRefresh()
+    public void startRefresh(String url)
     {
+        mCurrentURL = url;
         String[] params = {
-                "https://www.reddit.com/hot.json", ""
+                url, ""
         };
         Fetcher fetcher = new Fetcher();
         fetcher.addListener(new FetchCompleted() {
@@ -229,47 +238,25 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
 
     /**
      *
-     * Permets de gérer la sélection des items du drawer.
+     * Permets de gï¿½rer la sï¿½lection des items du drawer.
      *
-     * @param position La position sélectionné
+     * @param position La position sï¿½lectionnï¿½
      */
     @Override
     public void onDrawerItemSelected(int position) {
 
-        //On ferme le drawer à la sélection d'un item.
+        //On ferme le drawer ï¿½ la sï¿½lection d'un item.
         if (mDrawerLayout != null) {
             mDrawerLayout.closeDrawer(mDrawerRecyclerView);
         }
 
-        //On gère l'item sélectionné
+        //On gï¿½re l'item sï¿½lectionnï¿½
         ((DrawerAdapter) mDrawerAdapter).selectPosition(position);
-        switch (position)
-        {
-            case 1:
-                Toast.makeText(MainActivity.this, "Position = " + position, Toast.LENGTH_SHORT).show();
-                break;
-            case 2:
-                Toast.makeText(MainActivity.this, "Position = " + position, Toast.LENGTH_SHORT).show();
-                break;
-            case 3:
-                Toast.makeText(MainActivity.this, "Position = " + position, Toast.LENGTH_SHORT).show();
-                break;
-            case 4:
-                Toast.makeText(MainActivity.this, "Position = " + position, Toast.LENGTH_SHORT).show();
-                break;
-            case 5:
-                Toast.makeText(MainActivity.this, "Position = " + position, Toast.LENGTH_SHORT).show();
-                break;
-            case 6:
-                Toast.makeText(MainActivity.this, "Position = " + position, Toast.LENGTH_SHORT).show();
-                break;
-            default:
-                break;
-        }
+        startRefresh(((DrawerAdapter) mDrawerAdapter).getItem(position).getmUrl());
     }
 
     /**
-     * Gère les backPressed
+     * Gï¿½re les backPressed
      */
     @Override
     public void onBackPressed() {
@@ -284,7 +271,7 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
     }
 
     /**
-     * Méthode qui active l'action de recherche dans la toolbar
+     * Mï¿½thode qui active l'action de recherche dans la toolbar
      */
     private void enableSearchMenu() {
         //On retrouve l'action bar
@@ -325,14 +312,14 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
     }
 
     /**
-     * Méthode qui désactive l'action de recherche dans la toolbar
+     * Mï¿½thode qui dï¿½sactive l'action de recherche dans la toolbar
      */
     private void disableSearchMenu() {
 
         //On retrouve l'action bar
         ActionBar actionBar = getSupportActionBar();
 
-        //On désactive la custom view dans la toolbar et on affiche le titre
+        //On dï¿½sactive la custom view dans la toolbar et on affiche le titre
         actionBar.setDisplayShowCustomEnabled(false);
         actionBar.setDisplayShowTitleEnabled(true);
 
