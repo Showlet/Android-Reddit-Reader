@@ -6,12 +6,17 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.KeyEvent;
+import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
+import android.widget.GridLayout;
+import android.widget.LinearLayout;
+import android.widget.TableLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -44,7 +49,8 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
     private EditText mSearchBox;
     private boolean mIsSearchActive;
 
-
+    private  LinearLayoutManager linearLayoutManager;
+    private LinearLayout linearLayout;
     //Drawer
     private RecyclerView mDrawerRecyclerView;
     private RecyclerView.Adapter mDrawerAdapter;
@@ -54,6 +60,10 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
 
     // DerniereURL utilise
     private String mCurrentURL;
+
+    //GridLayout
+    private boolean isGrid;
+    private GridLayout gridLayout;
 
 
     /**
@@ -67,6 +77,8 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        // isGrid est la variable qui mets l'affichage en gridview ou en list.
+        isGrid = true;
         mCurrentURL = "https://www.reddit.com/hot.json";
 
         //Initialisation des helpers
@@ -82,6 +94,11 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
         InitialiserSwipeLayout();
         InitialiserToolbar();
         InitialiserDrawer();
+
+        if (isGrid) {
+            InitialiserGridLayout();
+        }
+
         commencerRafraichissement(mCurrentURL);
     }
 
@@ -147,8 +164,7 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
      * Initialise la toolbar. Elle est ajout�e et attach�e au layout
      *
      */
-    private void InitialiserToolbar()
-    {
+    private void InitialiserToolbar() {
         toolbar = (Toolbar) findViewById(R.id.action_bar);
         setSupportActionBar(toolbar);
     }
@@ -158,8 +174,13 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
      */
     private void InitialiserSwipeLayout()
     {
+        if (!isGrid) {
+            _swipe_layout = (SwipeRefreshLayout) findViewById(R.id.swipe_user_linear);
+        }
+        if(isGrid) {
+            _swipe_layout = (SwipeRefreshLayout) findViewById(R.id.swipe_user_grid);
+        }
 
-        _swipe_layout = (SwipeRefreshLayout) findViewById(R.id.swipe_user);
         _swipe_layout.setColorSchemeResources(R.color.colorPrimary);
         _swipe_layout.setOnRefreshListener(
                 new SwipeRefreshLayout.OnRefreshListener() {
@@ -171,17 +192,35 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
         );
     }
 
+    private void InitialiserGridLayout() {
+        gridLayout = (GridLayout) findViewById(R.id.gridLayout);
+        gridLayout.setUseDefaultMargins(false);
+        gridLayout.setAlignmentMode(GridLayout.ALIGN_BOUNDS);
+        gridLayout.setRowOrderPreserved(false);
+    }
+
     /**
      * Initialise le RecyclerView
      */
     private void InitialiserRecyclerView()
     {
-        _recyclelst_post = (RecyclerView) findViewById(R.id.recyclelist_post);
+        if (!isGrid) {
+            linearLayout = (LinearLayout)findViewById(R.id.linearLayout);
+            linearLayout.setVisibility(View.VISIBLE);
 
-        _recyclelst_post.setHasFixedSize(true);
-        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
-        linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
-        _recyclelst_post.setLayoutManager(linearLayoutManager);
+            _recyclelst_post = (RecyclerView) findViewById(R.id.recyclelist_post_linear);
+            _recyclelst_post.setHasFixedSize(true);
+           linearLayoutManager = new LinearLayoutManager(this);
+            linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
+            _recyclelst_post.setLayoutManager(linearLayoutManager);
+        }
+
+        else if (isGrid) {
+            _recyclelst_post = (RecyclerView) findViewById(R.id.recyclelist_post_grid);
+            _recyclelst_post.setHasFixedSize(true);
+            GridLayoutManager gridLayoutManager = new GridLayoutManager(this, 3);
+            _recyclelst_post.setLayoutManager(gridLayoutManager);
+        }
     }
 
     /**
@@ -240,7 +279,7 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
                 try {
 
                     FrontPage fp = gson.fromJson(m_result, FrontPage.class);
-                    _recyclelst_post.setAdapter(new PostAdapter(fp.data.children));
+                    _recyclelst_post.setAdapter(new PostAdapter(fp.data.children, isGrid));
                     _swipe_layout.setRefreshing(false);
 
                 } catch (Exception ex) {
