@@ -69,24 +69,6 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
 
         mCurrentURL = "https://www.reddit.com/hot.json";
 
-        _recyclelst_post = (RecyclerView) findViewById(R.id.recyclelist_post);
-        _swipe_layout = (SwipeRefreshLayout) findViewById(R.id.swipe_user);
-
-        _recyclelst_post.setHasFixedSize(true);
-        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
-        linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
-        _recyclelst_post.setLayoutManager(linearLayoutManager);
-
-        _swipe_layout.setColorSchemeResources(R.color.colorPrimary);
-        _swipe_layout.setOnRefreshListener(
-                new SwipeRefreshLayout.OnRefreshListener() {
-                    @Override
-                    public void onRefresh() {
-                        MainActivity.this.startRefresh(mCurrentURL);
-                    }
-                }
-        );
-
         //Initialisation des helpers
         PreferencesManager.initializeInstance(getApplicationContext());
         CacheManager.initializeInstance(getApplicationContext());
@@ -96,9 +78,11 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
 
 
         //Initialise les composantes de l'interface graphique.
+        InitialiserRecyclerView();
+        InitialiserSwipeLayout();
         InitialiserToolbar();
         InitialiserDrawer();
-        startRefresh(mCurrentURL);
+        commencerRafraichissement(mCurrentURL);
     }
 
     /**
@@ -169,7 +153,36 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
         setSupportActionBar(toolbar);
     }
 
+    /**
+     * Initialise le SwipeLayout et definit le OnRefresh
+     */
+    private void InitialiserSwipeLayout()
+    {
 
+        _swipe_layout = (SwipeRefreshLayout) findViewById(R.id.swipe_user);
+        _swipe_layout.setColorSchemeResources(R.color.colorPrimary);
+        _swipe_layout.setOnRefreshListener(
+                new SwipeRefreshLayout.OnRefreshListener() {
+                    @Override
+                    public void onRefresh() {
+                        MainActivity.this.commencerRafraichissement(mCurrentURL);
+                    }
+                }
+        );
+    }
+
+    /**
+     * Initialise le RecyclerView
+     */
+    private void InitialiserRecyclerView()
+    {
+        _recyclelst_post = (RecyclerView) findViewById(R.id.recyclelist_post);
+
+        _recyclelst_post.setHasFixedSize(true);
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
+        linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
+        _recyclelst_post.setLayoutManager(linearLayoutManager);
+    }
 
     /**
      *
@@ -209,7 +222,11 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
         mDrawerLayout.setDrawerListener(mActionBarDrawerToggleToggle);
     }
 
-    public void startRefresh(String url)
+    /**
+     *
+     * @param url ou on vas chercher les post
+     */
+    public void commencerRafraichissement(String url)
     {
         mCurrentURL = url;
         String[] params = {
@@ -252,7 +269,7 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
 
         //On g�re l'item s�lectionn�
         ((DrawerAdapter) mDrawerAdapter).selectPosition(position);
-        startRefresh(((DrawerAdapter) mDrawerAdapter).getItem(position).getmUrl());
+        commencerRafraichissement(((DrawerAdapter) mDrawerAdapter).getItem(position).getmUrl());
     }
 
     /**
