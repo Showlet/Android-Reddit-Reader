@@ -1,4 +1,4 @@
-package com.example.reddit;
+package com.example.reddit.utilities;
 
 /**
  * Created by vincent on 10/23/15.

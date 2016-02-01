@@ -23,6 +23,8 @@ import com.example.reddit.drawer.DrawerAdapter;
 import com.example.reddit.drawer.DrawerCallbacks;
 import com.example.reddit.drawer.DrawerItem;
 import com.example.reddit.utilities.CacheManager;
+import com.example.reddit.utilities.FetchCompleted;
+import com.example.reddit.utilities.Fetcher;
 import com.example.reddit.utilities.PreferencesManager;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -50,6 +52,9 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
     private ActionBarDrawerToggle mActionBarDrawerToggleToggle;
     private RecyclerView.LayoutManager mDrawerLayoutManager;
 
+    // DerniereURL utilise
+    private String mCurrentURL;
+
 
     /**
      *
@@ -62,23 +67,7 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        _recyclelst_post = (RecyclerView) findViewById(R.id.recyclelist_post);
-        _swipe_layout = (SwipeRefreshLayout) findViewById(R.id.swipe_user);
-
-        _recyclelst_post.setHasFixedSize(true);
-        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
-        linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
-        _recyclelst_post.setLayoutManager(linearLayoutManager);
-
-        _swipe_layout.setColorSchemeResources(R.color.colorPrimary);
-        _swipe_layout.setOnRefreshListener(
-                new SwipeRefreshLayout.OnRefreshListener() {
-                    @Override
-                    public void onRefresh() {
-                        MainActivity.this.startRefresh();
-                    }
-                }
-        );
+        mCurrentURL = "https://www.reddit.com/hot.json";
 
         //Initialisation des helpers
         PreferencesManager.initializeInstance(getApplicationContext());
@@ -89,9 +78,11 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
 
 
         //Initialise les composantes de l'interface graphique.
+        InitialiserRecyclerView();
+        InitialiserSwipeLayout();
         InitialiserToolbar();
         InitialiserDrawer();
-        startRefresh();
+        commencerRafraichissement(mCurrentURL);
     }
 
     /**
@@ -162,7 +153,36 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
         setSupportActionBar(toolbar);
     }
 
+    /**
+     * Initialise le SwipeLayout et definit le OnRefresh
+     */
+    private void InitialiserSwipeLayout()
+    {
 
+        _swipe_layout = (SwipeRefreshLayout) findViewById(R.id.swipe_user);
+        _swipe_layout.setColorSchemeResources(R.color.colorPrimary);
+        _swipe_layout.setOnRefreshListener(
+                new SwipeRefreshLayout.OnRefreshListener() {
+                    @Override
+                    public void onRefresh() {
+                        MainActivity.this.commencerRafraichissement(mCurrentURL);
+                    }
+                }
+        );
+    }
+
+    /**
+     * Initialise le RecyclerView
+     */
+    private void InitialiserRecyclerView()
+    {
+        _recyclelst_post = (RecyclerView) findViewById(R.id.recyclelist_post);
+
+        _recyclelst_post.setHasFixedSize(true);
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
+        linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
+        _recyclelst_post.setLayoutManager(linearLayoutManager);
+    }
 
     /**
      *
@@ -173,11 +193,12 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
 
         //On va g�rer sa diff�rament c'est juste pour tester.
         List<DrawerItem> drawerMenuItem = new ArrayList<DrawerItem>();
-        drawerMenuItem.add(new DrawerItem("/r Subreddit 1","https://www.reddit.com/hot.json",R.drawable.ic_action_trending_up));
-        drawerMenuItem.add(new DrawerItem("/r Subreddit 2","https://www.reddit.com/hot.json",R.drawable.ic_action_trending_up));
-        drawerMenuItem.add(new DrawerItem("/r Subreddit 3","https://www.reddit.com/hot.json",R.drawable.ic_action_trending_up));
-        drawerMenuItem.add(new DrawerItem("/r Subreddit 4","https://www.reddit.com/hot.json",R.drawable.ic_action_trending_up));
-        drawerMenuItem.add(new DrawerItem("/r Subreddit 5","https://www.reddit.com/hot.json",R.drawable.ic_action_trending_up));
+        drawerMenuItem.add(new DrawerItem("FrontPage","https://www.reddit.com/hot.json",R.drawable.ic_action_trending_up));
+        drawerMenuItem.add(new DrawerItem("/r/programming","https://www.reddit.com/r/programming.json",R.drawable.ic_action_trending_up));
+        drawerMenuItem.add(new DrawerItem("/r/gonewild","https://www.reddit.com/r/gonewild.json",R.drawable.ic_action_trending_up));
+        drawerMenuItem.add(new DrawerItem("/r/funny","https://www.reddit.com/r/funny.json",R.drawable.ic_action_trending_up));
+        drawerMenuItem.add(new DrawerItem("/r/aww","https://www.reddit.com/r/aww.json",R.drawable.ic_action_trending_up));
+        drawerMenuItem.add(new DrawerItem("/r/ama","https://www.reddit.com/r/ama.json",R.drawable.ic_action_trending_up));
 
 
         //On assigne le recycler � la vue,
@@ -201,10 +222,15 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
         mDrawerLayout.setDrawerListener(mActionBarDrawerToggleToggle);
     }
 
-    public void startRefresh()
+    /**
+     *
+     * @param url ou on vas chercher les post
+     */
+    public void commencerRafraichissement(String url)
     {
+        mCurrentURL = url;
         String[] params = {
-                "https://www.reddit.com/hot.json", ""
+                url, ""
         };
         Fetcher fetcher = new Fetcher();
         fetcher.addListener(new FetchCompleted() {
@@ -243,29 +269,7 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
 
         //On g�re l'item s�lectionn�
         ((DrawerAdapter) mDrawerAdapter).selectPosition(position);
-        switch (position)
-        {
-            case 1:
-                Toast.makeText(MainActivity.this, "Position = " + position, Toast.LENGTH_SHORT).show();
-                break;
-            case 2:
-                Toast.makeText(MainActivity.this, "Position = " + position, Toast.LENGTH_SHORT).show();
-                break;
-            case 3:
-                Toast.makeText(MainActivity.this, "Position = " + position, Toast.LENGTH_SHORT).show();
-                break;
-            case 4:
-                Toast.makeText(MainActivity.this, "Position = " + position, Toast.LENGTH_SHORT).show();
-                break;
-            case 5:
-                Toast.makeText(MainActivity.this, "Position = " + position, Toast.LENGTH_SHORT).show();
-                break;
-            case 6:
-                Toast.makeText(MainActivity.this, "Position = " + position, Toast.LENGTH_SHORT).show();
-                break;
-            default:
-                break;
-        }
+        commencerRafraichissement(((DrawerAdapter) mDrawerAdapter).getItem(position).getmUrl());
     }
 
     /**

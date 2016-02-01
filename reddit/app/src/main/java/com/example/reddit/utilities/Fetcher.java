@@ -1,19 +1,13 @@
-package com.example.reddit;
+package com.example.reddit.utilities;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.CharStreams;
 
-import android.content.Context;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.AsyncTask;
 
-import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
