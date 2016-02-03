@@ -61,7 +61,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
         holder.imgImage.setBackground(null);
         holder.imgImage.setBackgroundResource(R.drawable.defaultimg);
 
-        String urlpreview = null;
+        String urlpreview = post.data.thumbnail;
 
         if (post.data.preview != null)
             if (post.data.preview.images.size() >= 1)
