@@ -1,7 +1,5 @@
 package com.example.reddit;
 
-import android.graphics.Color;
-import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,11 +7,8 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import com.example.reddit.utilities.ImageLoader;
 
 import java.util.List;
-
-import static java.security.AccessController.getContext;
 
 /**
  * Created by vincent on 2016-01-28.
@@ -21,9 +16,15 @@ import static java.security.AccessController.getContext;
 public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder> {
 
     private List<FrontPage.Data.Children> _LstPost;
+    private boolean IsGrid;
 
     public PostAdapter(List<FrontPage.Data.Children> lstMessage) {
         _LstPost = lstMessage;
+    }
+
+    public PostAdapter(List<FrontPage.Data.Children> lstMessage, boolean isGrid) {
+        _LstPost = lstMessage;
+        IsGrid = isGrid;
     }
 
     @Override
@@ -37,9 +38,17 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
 
     @Override
     public PostViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View itemView = LayoutInflater.from(parent.getContext()).
-                inflate(R.layout.post_item, parent, false);
-        return new PostViewHolder(itemView);
+        if(IsGrid) {
+            View itemView = LayoutInflater.from(parent.getContext()).
+                    inflate(R.layout.post_item_grid, parent, false);
+            return new PostViewHolder(itemView);
+        }
+        if(!IsGrid) {
+            View itemView = LayoutInflater.from(parent.getContext()).
+                    inflate(R.layout.post_item_linear, parent, false);
+            return new PostViewHolder(itemView);
+        }
+        return null;
     }
 
     @Override

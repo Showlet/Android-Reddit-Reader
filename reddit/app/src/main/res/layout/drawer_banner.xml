@@ -1,45 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
+    android:layout_width="340dp"
     android:layout_height="match_parent"
     android:background="@android:color/white">
+
     <RelativeLayout
-        android:layout_width="match_parent"
+        android:id="@+id/navigationHeader"
+        android:layout_width="wrap_content"
         android:layout_height="168dp"
         android:background="@drawable/banner"
-        android:id="@+id/navigationHeader"
         android:paddingTop="24dp">
 
         <ImageView
+            android:id="@+id/avatar"
             android:layout_width="64dp"
             android:layout_height="64dp"
-            android:id="@+id/avatar"
-            android:layout_alignParentTop="true"
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginBottom="8dp"
             android:layout_marginLeft="16dp"
-            android:layout_marginTop="16dp"
-            android:layout_marginBottom="8dp"/>
+            android:layout_marginTop="16dp" />
 
-    <LinearLayout
-        android:layout_width="fill_parent"
-        android:layout_height="56dp"
-        android:orientation="vertical"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_below="@+id/avatar"
-        android:layout_marginRight="16dp"
-        android:layout_marginLeft="16dp"
-        android:layout_marginBottom="8dp">
-        <TextView
-            android:id="@+id/alias"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:textColor="#ffffff"
-            android:text="MaxVerro"
-            android:textSize="14sp"
-            android:textStyle="bold" />
-    </LinearLayout>
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="56dp"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_below="@+id/avatar"
+            android:layout_marginBottom="8dp"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/alias"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:text="Dr.Cholette"
+                android:textColor="#ffffff"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+        </LinearLayout>
     </RelativeLayout>
 </RelativeLayout>

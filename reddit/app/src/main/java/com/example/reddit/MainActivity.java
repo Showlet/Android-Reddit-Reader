@@ -2,17 +2,23 @@ package com.example.reddit;
 
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.KeyEvent;
+import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
+import android.widget.GridLayout;
+import android.widget.LinearLayout;
+import android.widget.TableLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -27,13 +33,22 @@ import com.example.reddit.utilities.CacheManager;
 import com.example.reddit.utilities.FetchCompleted;
 import com.example.reddit.utilities.Fetcher;
 import com.example.reddit.utilities.PreferencesManager;
+import com.example.reddit.utilities.WebServiceClient;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.loopj.android.http.AsyncHttpResponseHandler;
+import com.loopj.android.http.JsonHttpResponseHandler;
+import com.loopj.android.http.RequestParams;
+
 import android.view.Menu;
 import android.view.MenuItem;
 
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.util.List;
+
+import cz.msebera.android.httpclient.Header;
 
 public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
     private RecyclerView _recyclelst_post;
@@ -45,7 +60,8 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
     private EditText mSearchBox;
     private boolean mIsSearchActive;
 
-
+    private  LinearLayoutManager linearLayoutManager;
+    private LinearLayout linearLayout;
     //Drawer
     private RecyclerView mDrawerRecyclerView;
     private RecyclerView.Adapter mDrawerAdapter;
@@ -55,6 +71,11 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
 
     // DerniereURL utilise
     private String mCurrentURL;
+    private String mCurrentSubreddit;
+
+    //GridLayout
+    private boolean isGrid;
+    private GridLayout gridLayout;
 
 
     /**
@@ -68,6 +89,8 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        // isGrid est la variable qui mets l'affichage en gridview ou en list.
+        isGrid = true;
         mCurrentURL = "https://www.reddit.com/hot.json";
 
         //Initialisation des helpers
@@ -79,10 +102,15 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
 
 
         //Initialise les composantes de l'interface graphique.
-        InitialiserRecyclerView();
-        InitialiserSwipeLayout();
-        InitialiserToolbar();
-        InitialiserDrawer();
+        initialiserRecyclerView();
+        initialiserSwipeLayout();
+        initialiserToolbar();
+        initialiserDrawer();
+
+        if (isGrid) {
+            InitialiserGridLayout();
+        }
+
         commencerRafraichissement(mCurrentURL);
     }
 
@@ -150,8 +178,7 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
      * Initialise la toolbar. Elle est ajout�e et attach�e au layout
      *
      */
-    private void InitialiserToolbar()
-    {
+    private void initialiserToolbar() {
         toolbar = (Toolbar) findViewById(R.id.action_bar);
         setSupportActionBar(toolbar);
     }
@@ -159,10 +186,15 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
     /**
      * Initialise le SwipeLayout et definit le OnRefresh
      */
-    private void InitialiserSwipeLayout()
+    private void initialiserSwipeLayout()
     {
+        if (!isGrid) {
+            _swipe_layout = (SwipeRefreshLayout) findViewById(R.id.swipe_user_linear);
+        }
+        if(isGrid) {
+            _swipe_layout = (SwipeRefreshLayout) findViewById(R.id.swipe_user_grid);
+        }
 
-        _swipe_layout = (SwipeRefreshLayout) findViewById(R.id.swipe_user);
         _swipe_layout.setColorSchemeResources(R.color.colorPrimary);
         _swipe_layout.setOnRefreshListener(
                 new SwipeRefreshLayout.OnRefreshListener() {
@@ -174,17 +206,35 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
         );
     }
 
+    private void InitialiserGridLayout() {
+        gridLayout = (GridLayout) findViewById(R.id.gridLayout);
+        gridLayout.setUseDefaultMargins(false);
+        gridLayout.setAlignmentMode(GridLayout.ALIGN_BOUNDS);
+        gridLayout.setRowOrderPreserved(false);
+    }
+
     /**
      * Initialise le RecyclerView
      */
-    private void InitialiserRecyclerView()
+    private void initialiserRecyclerView()
     {
-        _recyclelst_post = (RecyclerView) findViewById(R.id.recyclelist_post);
+        if (!isGrid) {
+            linearLayout = (LinearLayout)findViewById(R.id.linearLayout);
+            linearLayout.setVisibility(View.VISIBLE);
 
-        _recyclelst_post.setHasFixedSize(true);
-        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
-        linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
-        _recyclelst_post.setLayoutManager(linearLayoutManager);
+            _recyclelst_post = (RecyclerView) findViewById(R.id.recyclelist_post_linear);
+            _recyclelst_post.setHasFixedSize(true);
+           linearLayoutManager = new LinearLayoutManager(this);
+            linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
+            _recyclelst_post.setLayoutManager(linearLayoutManager);
+        }
+
+        else if (isGrid) {
+            _recyclelst_post = (RecyclerView) findViewById(R.id.recyclelist_post_grid);
+            _recyclelst_post.setHasFixedSize(true);
+            GridLayoutManager gridLayoutManager = new GridLayoutManager(this, 3);
+            _recyclelst_post.setLayoutManager(gridLayoutManager);
+        }
     }
 
     /**
@@ -192,11 +242,11 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
      * Initialise le drawer de navigation.
      *
      */
-    private void InitialiserDrawer()  {
+    private void initialiserDrawer()  {
 
         //On va g�rer sa diff�rament c'est juste pour tester.
         List<DrawerItem> drawerMenuItem = new ArrayList<DrawerItem>();
-        drawerMenuItem.add(new DrawerItem("FrontPage","https://www.reddit.com/hot.json",R.drawable.ic_action_trending_up));
+        drawerMenuItem.add(new DrawerItem("Front","https://www.reddit.com/hot.json",R.drawable.ic_action_trending_up));
         drawerMenuItem.add(new DrawerItem("/r/programming","https://www.reddit.com/r/programming.json",R.drawable.ic_action_trending_up));
         drawerMenuItem.add(new DrawerItem("/r/gonewild","https://www.reddit.com/r/gonewild.json",R.drawable.ic_action_trending_up));
         drawerMenuItem.add(new DrawerItem("/r/funny","https://www.reddit.com/r/funny.json",R.drawable.ic_action_trending_up));
@@ -243,7 +293,7 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
                 try {
 
                     FrontPage fp = gson.fromJson(m_result, FrontPage.class);
-                    _recyclelst_post.setAdapter(new PostAdapter(fp.data.children));
+                    _recyclelst_post.setAdapter(new PostAdapter(fp.data.children, isGrid));
                     _swipe_layout.setRefreshing(false);
 
                 } catch (Exception ex) {
@@ -258,7 +308,7 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
 
     /**
      *
-     * Permets de g�rer la s�lection des items du drawer.
+     * Permets de g�rer la sélection des items du drawer.
      *
      * @param position La position s�lectionn�
      */
@@ -272,6 +322,8 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
 
         //On g�re l'item s�lectionn�
         ((DrawerAdapter) mDrawerAdapter).selectPosition(position);
+        mCurrentSubreddit = ((DrawerAdapter) mDrawerAdapter).getItem(position).getText();
+        mCurrentSubreddit = mCurrentSubreddit == "Front Page" ?  null : mCurrentSubreddit;
         commencerRafraichissement(((DrawerAdapter) mDrawerAdapter).getItem(position).getmUrl());
     }
 
@@ -311,7 +363,8 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 if (actionId == EditorInfo.IME_ACTION_SEARCH) {
-                    //TODO: Search
+                    doSearch();
+                    disableSearchMenu();
                     return true;
                 }
                 return false;
@@ -343,6 +396,8 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
         actionBar.setDisplayShowCustomEnabled(false);
         actionBar.setDisplayShowTitleEnabled(true);
 
+        //On enleve le focus au text box
+        mSearchBox.clearFocus();
 
         //On masque le clavier tactil
         InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
@@ -352,6 +407,56 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
         mSearchAction.setIcon(getResources().getDrawable(R.drawable.ic_action_search_white));
 
         mIsSearchActive = false;
+    }
+
+    /**
+     *
+     */
+    private void doSearch()
+    {
+        if(mCurrentSubreddit != null) {
+            RequestParams requestParams = new RequestParams();
+            requestParams.add("q",mSearchBox.getText().toString());
+            requestParams.add("restrict_sr","on");
+            requestParams.add("sort","relevance");
+            requestParams.add("t","all");
+
+            WebServiceClient.get(mCurrentSubreddit + "/search.json", requestParams, new JsonHttpResponseHandler() {
+
+                @Override
+                public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+                    FrontPage fp = new GsonBuilder().create().fromJson(response.toString(), FrontPage.class);
+                    _recyclelst_post.setAdapter(new PostAdapter(fp.data.children));
+                    _swipe_layout.setRefreshing(false);
+                }
+
+                @Override
+                public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
+                    //TODO Handle le onFailure
+                }
+            });
+        }
+        else{
+            RequestParams requestParams = new RequestParams();
+            requestParams.add("q",mSearchBox.getText().toString());
+            requestParams.add("restrict_sr","off");
+            requestParams.add("sort","relevance");
+            requestParams.add("t","all");
+            WebServiceClient.get("/search.json", requestParams, new JsonHttpResponseHandler() {
+
+                @Override
+                public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+                    FrontPage fp = new GsonBuilder().create().fromJson(response.toString(), FrontPage.class);
+                    _recyclelst_post.setAdapter(new PostAdapter(fp.data.children));
+                    _swipe_layout.setRefreshing(false);
+                }
+
+                @Override
+                public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
+                    //TODO Handle le onFailure
+                }
+            });
+        }
     }
 
 }
