@@ -426,7 +426,7 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
                 @Override
                 public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                     FrontPage fp = new GsonBuilder().create().fromJson(response.toString(), FrontPage.class);
-                    _recyclelst_post.setAdapter(new PostAdapter(fp.data.children));
+                    _recyclelst_post.setAdapter(new PostAdapter(fp.data.children, isGrid));
                     _swipe_layout.setRefreshing(false);
                 }
 
@@ -447,7 +447,7 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
                 @Override
                 public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                     FrontPage fp = new GsonBuilder().create().fromJson(response.toString(), FrontPage.class);
-                    _recyclelst_post.setAdapter(new PostAdapter(fp.data.children));
+                    _recyclelst_post.setAdapter(new PostAdapter(fp.data.children, isGrid));
                     _swipe_layout.setRefreshing(false);
                 }
 
