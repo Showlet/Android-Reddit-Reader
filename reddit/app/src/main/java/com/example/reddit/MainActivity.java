@@ -89,13 +89,15 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // isGrid est la variable qui mets l'affichage en gridview ou en list.
-        isGrid = true;
-        mCurrentURL = "https://www.reddit.com/hot.json";
-
         //Initialisation des helpers
         PreferencesManager.initializeInstance(getApplicationContext());
         CacheManager.initializeInstance(getApplicationContext());
+
+        // isGrid est la variable qui mets l'affichage en gridview ou en list.
+        String sadf = PreferencesManager.getInstance().getPreference("AFFICHAGE_SETTING");
+        isGrid = (sadf.equals("Grid"));
+        mCurrentURL = "https://www.reddit.com/hot.json";
+
 
         //Active le http caching
         CacheManager.getInstance().enableHttpCaching();

@@ -4,9 +4,87 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.example.reddit.SettingActivity">
+
     <include
         android:id="@+id/action_bar"
-        layout="@layout/action_bar">
-    </include>
+        layout="@layout/action_bar"></include>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:orientation="vertical"
+        android:layout_height="match_parent"
+        android:padding="10dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentEnd="true"
+            android:layout_marginTop="69dp"
+            android:id="@+id/linearLayout2">
+
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Affichage"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentStart="true"
+            android:layout_gravity="center_vertical"
+            android:layout_margin="10dp" />
+
+        <Spinner
+            android:id="@+id/setting_affichage_spinner"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:spinnerMode="dropdown"
+            android:textAlignment="textEnd"
+            android:layout_gravity="center_vertical|right"
+            android:gravity="end"
+            android:layout_margin="5dp" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_below="@+id/linearLayout2"
+            android:layout_alignParentEnd="false"
+            android:layout_alignParentTop="false"
+            android:layout_centerHorizontal="true">
+
+            <TextView
+                android:id="@+id/textView2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="NSFW Content"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentStart="true"
+                android:layout_gravity="center_vertical"
+                android:layout_margin="10dp" />
+
+            <Spinner
+                android:id="@+id/setting_nsfw_spinner"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:spinnerMode="dropdown"
+                android:textAlignment="textEnd"
+                android:layout_gravity="center_vertical|right"
+                android:gravity="end|right"
+                android:layout_margin="5dp" />
+        </LinearLayout>
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Save"
+            android:id="@+id/btn_setting_save"
+            android:layout_gravity="center_horizontal"
+            android:onClick="onClickSave" />
+    </LinearLayout>
 
 </RelativeLayout>

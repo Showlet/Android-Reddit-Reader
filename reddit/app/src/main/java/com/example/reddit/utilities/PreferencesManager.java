@@ -90,6 +90,28 @@ public class PreferencesManager {
     }
 
     /**
+     * Permet d'enregistrer un parametre
+     * @param Key
+     * @param Value
+     */
+    public void setPreference(String Key, String Value)
+    {
+        mSharedPreferences.edit()
+                .putString(Key, Value)
+                .apply();
+    }
+
+    /**
+     * Permet de retrouve un parametre enregistrer
+     * @param Key
+     * @return
+     */
+    public String getPreference(String Key)
+    {
+        return mSharedPreferences.getString(Key, "Invalid Key");
+    }
+
+    /**
      * Efface la pair clef/valeur spécifiée si elle existe.
      */
     public void remove(String key) {
