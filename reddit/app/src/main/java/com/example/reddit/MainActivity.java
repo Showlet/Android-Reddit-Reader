@@ -175,7 +175,7 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
      * Initialise la toolbar. Elle est ajout�e et attach�e au layout
      *
      */
-    private void InitialiserToolbar() {
+    private void initialiserToolbar() {
         toolbar = (Toolbar) findViewById(R.id.action_bar);
         setSupportActionBar(toolbar);
     }
