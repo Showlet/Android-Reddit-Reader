@@ -71,6 +71,7 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
     // DerniereURL utilise
     private String mCurrentURL;
     private String mCurrentSubreddit;
+    private String mCurrentFilter;
 
     //GridLayout
     private boolean isGrid;
@@ -90,7 +91,8 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
 
         // isGrid est la variable qui mets l'affichage en gridview ou en list.
         isGrid = true;
-        mCurrentURL = "https://www.reddit.com/hot.json";
+        mCurrentURL = "https://www.reddit.com";
+        mCurrentFilter = "/hot";
 
         //Initialisation des helpers
         PreferencesManager.initializeInstance(getApplicationContext());
@@ -150,11 +152,21 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Il faut se charger de traiter les click sur les options du menu ici
-        //TODO: Filtrer les post, etc.
-        int id = item.getItemId();
 
-        switch (id) {
+        switch (item.getItemId()) {
             case R.id.action_filter:
+                return true;
+            case R.id.action_filter_hot:
+                mCurrentFilter = "/hot";
+                commencerRafraichissement(mCurrentURL);
+                return true;
+            case R.id.action_filter_new:
+                mCurrentFilter = "/new";
+                commencerRafraichissement(mCurrentURL);
+                return true;
+            case R.id.action_filter_rising:
+                mCurrentFilter = "/rising";
+                commencerRafraichissement(mCurrentURL);
                 return true;
             case R.id.action_settings:
                 return true;
@@ -243,12 +255,12 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
 
         //On va g�rer sa diff�rament c'est juste pour tester.
         List<DrawerItem> drawerMenuItem = new ArrayList<DrawerItem>();
-        drawerMenuItem.add(new DrawerItem("Front","https://www.reddit.com/hot.json",R.drawable.ic_action_trending_up));
-        drawerMenuItem.add(new DrawerItem("/r/programming","https://www.reddit.com/r/programming.json",R.drawable.ic_action_trending_up));
-        drawerMenuItem.add(new DrawerItem("/r/gonewild","https://www.reddit.com/r/gonewild.json",R.drawable.ic_action_trending_up));
-        drawerMenuItem.add(new DrawerItem("/r/funny","https://www.reddit.com/r/funny.json",R.drawable.ic_action_trending_up));
-        drawerMenuItem.add(new DrawerItem("/r/aww","https://www.reddit.com/r/aww.json",R.drawable.ic_action_trending_up));
-        drawerMenuItem.add(new DrawerItem("/r/ama","https://www.reddit.com/r/ama.json",R.drawable.ic_action_trending_up));
+        drawerMenuItem.add(new DrawerItem("Front","https://www.reddit.com",R.drawable.ic_action_trending_up));
+        drawerMenuItem.add(new DrawerItem("/r/programming","https://www.reddit.com/r/programming",R.drawable.ic_action_trending_up));
+        drawerMenuItem.add(new DrawerItem("/r/gonewild","https://www.reddit.com/r/gonewild",R.drawable.ic_action_trending_up));
+        drawerMenuItem.add(new DrawerItem("/r/funny","https://www.reddit.com/r/funny",R.drawable.ic_action_trending_up));
+        drawerMenuItem.add(new DrawerItem("/r/aww","https://www.reddit.com/r/aww",R.drawable.ic_action_trending_up));
+        drawerMenuItem.add(new DrawerItem("/r/ama","https://www.reddit.com/r/ama",R.drawable.ic_action_trending_up));
 
 
         //On assigne le recycler � la vue,
@@ -280,7 +292,7 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
     {
         mCurrentURL = url;
         String[] params = {
-                url, ""
+                url + mCurrentFilter + ".json", ""
         };
         Fetcher fetcher = new Fetcher();
         fetcher.addListener(new FetchCompleted() {
@@ -321,6 +333,7 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
         ((DrawerAdapter) mDrawerAdapter).selectPosition(position);
         mCurrentSubreddit = ((DrawerAdapter) mDrawerAdapter).getItem(position).getText();
         mCurrentSubreddit = mCurrentSubreddit == "Front Page" ?  null : mCurrentSubreddit;
+        mCurrentFilter = "/hot";
         commencerRafraichissement(((DrawerAdapter) mDrawerAdapter).getItem(position).getmUrl());
     }
 
@@ -395,10 +408,10 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
 
         //On enleve le focus au text box
         mSearchBox.clearFocus();
-
+        View view = this.getCurrentFocus();
         //On masque le clavier tactil
         InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-        imm.hideSoftInputFromWindow(mSearchBox.getWindowToken(), 0);
+        imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
 
         //On ajoute l'icon (loupe) de recherche
         mSearchAction.setIcon(getResources().getDrawable(R.drawable.ic_action_search_white));
