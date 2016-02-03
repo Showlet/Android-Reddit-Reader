@@ -1,6 +1,7 @@
 package com.example.reddit;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -169,6 +170,8 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
                 commencerRafraichissement(mCurrentURL);
                 return true;
             case R.id.action_settings:
+                Intent intent = new Intent(this, SettingActivity.class);
+                startActivity(intent);
                 return true;
             case R.id.action_search:
                 if(mIsSearchActive)
@@ -436,7 +439,7 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
                 @Override
                 public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                     FrontPage fp = new GsonBuilder().create().fromJson(response.toString(), FrontPage.class);
-                    _recyclelst_post.setAdapter(new PostAdapter(fp.data.children));
+                    _recyclelst_post.setAdapter(new PostAdapter(fp.data.children, isGrid));
                     _swipe_layout.setRefreshing(false);
                 }
 
@@ -457,7 +460,7 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
                 @Override
                 public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                     FrontPage fp = new GsonBuilder().create().fromJson(response.toString(), FrontPage.class);
-                    _recyclelst_post.setAdapter(new PostAdapter(fp.data.children));
+                    _recyclelst_post.setAdapter(new PostAdapter(fp.data.children, isGrid));
                     _swipe_layout.setRefreshing(false);
                 }
 
