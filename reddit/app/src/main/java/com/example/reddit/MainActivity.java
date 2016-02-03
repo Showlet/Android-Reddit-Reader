@@ -1,6 +1,7 @@
 package com.example.reddit;
 
 import android.content.Context;
+import android.content.Intent;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBar;
@@ -129,6 +130,8 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
             case R.id.action_filter:
                 return true;
             case R.id.action_settings:
+                Intent intent = new Intent(this, SettingActivity.class);
+                startActivity(intent);
                 return true;
             case R.id.action_search:
                 if(mIsSearchActive)
