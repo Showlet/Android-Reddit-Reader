@@ -176,8 +176,6 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
      *
      */
     private void InitialiserToolbar() {
-    private void initialiserToolbar()
-    {
         toolbar = (Toolbar) findViewById(R.id.action_bar);
         setSupportActionBar(toolbar);
     }
