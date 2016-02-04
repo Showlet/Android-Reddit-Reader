@@ -54,7 +54,7 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
     private EditText mSearchBox;
     private boolean mIsSearchActive;
 
-    private  LinearLayoutManager linearLayoutManager;
+    private LinearLayoutManager linearLayoutManager;
     private LinearLayout linearLayout;
     //Drawer
     private RecyclerView mDrawerRecyclerView;
@@ -67,6 +67,7 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
     private String mCurrentURL;
     private String mCurrentSubreddit;
     private String mCurrentFilter;
+    private String mProchainePage;
 
     //GridLayout
     private boolean isGrid;
@@ -74,7 +75,6 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
 
 
     /**
-     *
      * � la cr�ation de l'activit� (NO SHIT)
      *
      * @param savedInstanceState
@@ -113,13 +113,12 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
     }
 
     /**
-     *
      * Apr�s la cr�ation de l'activit� (NO SHIT)
      *
      * @param savedInstanceState
      */
     @Override
-    protected void onPostCreate(Bundle savedInstanceState){
+    protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
 
         //On synchronise l'�tat (ouvert/ferm�) du drawer
@@ -127,7 +126,6 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
     }
 
     /**
-     *
      * � la cr�ation des options du menu (Toolbar) (NO SHIT)
      *
      * @param menu
@@ -143,6 +141,7 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
 
     /**
      * � la s�lection d'un item du menu (NO SHIT)
+     *
      * @param item l'item s�lectionn�
      * @return super.onOptionsItemSelected(item)
      */
@@ -170,7 +169,7 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
                 startActivity(intent);
                 return true;
             case R.id.action_search:
-                if(mIsSearchActive)
+                if (mIsSearchActive)
                     disableSearchMenu();
                 else
                     enableSearchMenu();
@@ -182,9 +181,7 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
 
 
     /**
-     *
      * Initialise la toolbar. Elle est ajout�e et attach�e au layout
-     *
      */
     private void initialiserToolbar() {
         toolbar = (Toolbar) findViewById(R.id.action_bar);
@@ -194,12 +191,11 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
     /**
      * Initialise le SwipeLayout et definit le OnRefresh
      */
-    private void initialiserSwipeLayout()
-    {
+    private void initialiserSwipeLayout() {
         if (!isGrid) {
             _swipe_layout = (SwipeRefreshLayout) findViewById(R.id.swipe_user_linear);
         }
-        if(isGrid) {
+        if (isGrid) {
             _swipe_layout = (SwipeRefreshLayout) findViewById(R.id.swipe_user_grid);
         }
 
@@ -224,42 +220,52 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
     /**
      * Initialise le RecyclerView
      */
-    private void initialiserRecyclerView()
-    {
+    private void initialiserRecyclerView() {
         if (!isGrid) {
-            linearLayout = (LinearLayout)findViewById(R.id.linearLayout);
+            linearLayout = (LinearLayout) findViewById(R.id.linearLayout);
             linearLayout.setVisibility(View.VISIBLE);
 
             _recyclelst_post = (RecyclerView) findViewById(R.id.recyclelist_post_linear);
             _recyclelst_post.setHasFixedSize(true);
-           linearLayoutManager = new LinearLayoutManager(this);
+            linearLayoutManager = new LinearLayoutManager(this);
             linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
             _recyclelst_post.setLayoutManager(linearLayoutManager);
-        }
-
-        else if (isGrid) {
+        } else if (isGrid) {
             _recyclelst_post = (RecyclerView) findViewById(R.id.recyclelist_post_grid);
             _recyclelst_post.setHasFixedSize(true);
             GridLayoutManager gridLayoutManager = new GridLayoutManager(this, 3);
             _recyclelst_post.setLayoutManager(gridLayoutManager);
         }
+        _recyclelst_post.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                if (!recyclerView.canScrollVertically(-1)) {
+                    //Scroll at Top
+                } else if (!recyclerView.canScrollVertically(1)) {
+                    //Scroll at bottom
+
+                } else if (dy < 0) {
+                    //Scroll up
+                } else if (dy > 0) {
+                    //Scroll down
+                }
+            }
+        });
     }
 
     /**
-     *
      * Initialise le drawer de navigation.
-     *
      */
-    private void initialiserDrawer()  {
+    private void initialiserDrawer() {
 
         //On va g�rer sa diff�rament c'est juste pour tester.
         List<DrawerItem> drawerMenuItem = new ArrayList<DrawerItem>();
-        drawerMenuItem.add(new DrawerItem("Front","https://www.reddit.com",R.drawable.ic_action_trending_up));
-        drawerMenuItem.add(new DrawerItem("/r/programming","https://www.reddit.com/r/programming",R.drawable.ic_action_trending_up));
-        drawerMenuItem.add(new DrawerItem("/r/gonewild","https://www.reddit.com/r/gonewild",R.drawable.ic_action_trending_up));
-        drawerMenuItem.add(new DrawerItem("/r/funny","https://www.reddit.com/r/funny",R.drawable.ic_action_trending_up));
-        drawerMenuItem.add(new DrawerItem("/r/aww","https://www.reddit.com/r/aww",R.drawable.ic_action_trending_up));
-        drawerMenuItem.add(new DrawerItem("/r/ama","https://www.reddit.com/r/ama",R.drawable.ic_action_trending_up));
+        drawerMenuItem.add(new DrawerItem("Front", "https://www.reddit.com", R.drawable.ic_action_trending_up));
+        drawerMenuItem.add(new DrawerItem("/r/programming", "https://www.reddit.com/r/programming", R.drawable.ic_action_trending_up));
+        drawerMenuItem.add(new DrawerItem("/r/gonewild", "https://www.reddit.com/r/gonewild", R.drawable.ic_action_trending_up));
+        drawerMenuItem.add(new DrawerItem("/r/funny", "https://www.reddit.com/r/funny", R.drawable.ic_action_trending_up));
+        drawerMenuItem.add(new DrawerItem("/r/aww", "https://www.reddit.com/r/aww", R.drawable.ic_action_trending_up));
+        drawerMenuItem.add(new DrawerItem("/r/ama", "https://www.reddit.com/r/ama", R.drawable.ic_action_trending_up));
 
 
         //On assigne le recycler � la vue,
@@ -268,7 +274,7 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
         mDrawerRecyclerView.setHasFixedSize(true);
 
         //Cr�ation de l'adapteur.
-        mDrawerAdapter = new DrawerAdapter("MaxVerro",R.drawable.avatar,drawerMenuItem,this);
+        mDrawerAdapter = new DrawerAdapter("MaxVerro", R.drawable.avatar, drawerMenuItem, this);
         mDrawerRecyclerView.setAdapter(mDrawerAdapter);
 
         //Cr�ation du layout manager pour g�rer le drawer
@@ -277,18 +283,16 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
 
         //On assigne le layout du drawer
         mDrawerLayout = (DrawerLayout) findViewById(R.id.DrawerLayout);
-        mActionBarDrawerToggleToggle = new ActionBarDrawerToggle(this,mDrawerLayout,toolbar,R.string.drawer_open,R.string.drawer_open);
+        mActionBarDrawerToggleToggle = new ActionBarDrawerToggle(this, mDrawerLayout, toolbar, R.string.drawer_open, R.string.drawer_open);
 
         //Listener pour l'ouverture et la fermeture du drawer
         mDrawerLayout.setDrawerListener(mActionBarDrawerToggleToggle);
     }
 
     /**
-     *
      * @param url ou on vas chercher les post
      */
-    public void commencerRafraichissement(String url)
-    {
+    public void commencerRafraichissement(String url) {
         mCurrentURL = url;
         String[] params = {
                 url + mCurrentFilter + ".json", ""
@@ -301,6 +305,7 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
                 try {
 
                     FrontPage fp = gson.fromJson(m_result, FrontPage.class);
+                    mProchainePage = fp.data.after;
                     _recyclelst_post.setAdapter(new PostAdapter(fp.data.children, isGrid));
                     _swipe_layout.setRefreshing(false);
 
@@ -315,7 +320,6 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
 
 
     /**
-     *
      * Permets de g�rer la sélection des items du drawer.
      *
      * @param position La position s�lectionn�
@@ -331,7 +335,7 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
         //On g�re l'item s�lectionn�
         ((DrawerAdapter) mDrawerAdapter).selectPosition(position);
         mCurrentSubreddit = ((DrawerAdapter) mDrawerAdapter).getItem(position).getText();
-        mCurrentSubreddit = mCurrentSubreddit == "Front Page" ?  null : mCurrentSubreddit;
+        mCurrentSubreddit = mCurrentSubreddit == "Front Page" ? null : mCurrentSubreddit;
         mCurrentFilter = "/hot";
         commencerRafraichissement(((DrawerAdapter) mDrawerAdapter).getItem(position).getmUrl());
     }
@@ -345,7 +349,7 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
         //Si le drawer est ouvert on le ferme
         if (mDrawerLayout.isDrawerOpen(mDrawerRecyclerView))
             mDrawerLayout.closeDrawer(mDrawerRecyclerView);
-        else if(mIsSearchActive)
+        else if (mIsSearchActive)
             disableSearchMenu();
         else
             super.onBackPressed();
@@ -421,14 +425,13 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
     /**
      *
      */
-    private void doSearch()
-    {
-        if(mCurrentSubreddit != null) {
+    private void doSearch() {
+        if (mCurrentSubreddit != null) {
             RequestParams requestParams = new RequestParams();
-            requestParams.add("q",mSearchBox.getText().toString());
-            requestParams.add("restrict_sr","on");
-            requestParams.add("sort","relevance");
-            requestParams.add("t","all");
+            requestParams.add("q", mSearchBox.getText().toString());
+            requestParams.add("restrict_sr", "on");
+            requestParams.add("sort", "relevance");
+            requestParams.add("t", "all");
 
             WebServiceClient.get(mCurrentSubreddit + "/search.json", requestParams, new JsonHttpResponseHandler() {
 
@@ -444,13 +447,12 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
                     //TODO Handle le onFailure
                 }
             });
-        }
-        else{
+        } else {
             RequestParams requestParams = new RequestParams();
-            requestParams.add("q",mSearchBox.getText().toString());
-            requestParams.add("restrict_sr","off");
-            requestParams.add("sort","relevance");
-            requestParams.add("t","all");
+            requestParams.add("q", mSearchBox.getText().toString());
+            requestParams.add("restrict_sr", "off");
+            requestParams.add("sort", "relevance");
+            requestParams.add("t", "all");
             WebServiceClient.get("/search.json", requestParams, new JsonHttpResponseHandler() {
 
                 @Override
