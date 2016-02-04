@@ -36,6 +36,12 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
         return _LstPost.get(pos).data;
     }
 
+    public void addItem(FrontPage.Data.Children post)
+    {
+        _LstPost.add(post);
+        notifyItemInserted(_LstPost.size() - 1);
+    }
+
     @Override
     public PostViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         if(IsGrid) {
@@ -60,6 +66,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
         holder.imgImage.setImageBitmap(null);
         holder.imgImage.setBackground(null);
         holder.imgImage.setBackgroundResource(R.drawable.defaultimg);
+        holder.imagePost = post;
 
         String urlpreview = post.data.thumbnail;
 
@@ -76,6 +83,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
         protected ImageView imgImage;
         protected TextView tvUser;
         protected ProgressBar progressBar;
+        protected FrontPage.Data.Children imagePost;
 
         public PostViewHolder(View v) {
             super(v);

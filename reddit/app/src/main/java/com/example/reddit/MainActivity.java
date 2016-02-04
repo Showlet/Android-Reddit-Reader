@@ -1,8 +1,14 @@
 package com.example.reddit;
 
+import android.annotation.TargetApi;
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Build;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBar;
@@ -11,27 +17,32 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.style.BackgroundColorSpan;
 import android.support.v7.widget.Toolbar;
 import android.view.KeyEvent;
 import android.view.Menu;
+import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.GridLayout;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
+import android.widget.TableLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.reddit.drawer.DrawerAdapter;
 import com.example.reddit.drawer.DrawerCallbacks;
 import com.example.reddit.drawer.DrawerItem;
-import com.example.reddit.utilities.CacheManager;
-import com.example.reddit.utilities.FetchCompleted;
-import com.example.reddit.utilities.Fetcher;
-import com.example.reddit.utilities.PreferencesManager;
-import com.example.reddit.utilities.WebServiceClient;
+import com.example.reddit.utilities.*;
+import com.example.reddit.utilities.ImageLoader;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.loopj.android.http.JsonHttpResponseHandler;
@@ -73,6 +84,11 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
     private boolean isGrid;
     private GridLayout gridLayout;
 
+    // Fullscreen image
+    private ImageView fullImage;
+    private boolean imageIsFullscreen;
+    private DrawerLayout drawerLayout;
+    private ImageView dimBackground;
 
     /**
      * � la cr�ation de l'activit� (NO SHIT)
@@ -80,9 +96,14 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
      * @param savedInstanceState
      */
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate( Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        // isGrid est la variable qui mets l'affichage en gridview ou en list.
+        isGrid = false;
+
+        dimBackground = (ImageView) findViewById(R.id.dimBackground);
 
         //Initialisation des helpers
         PreferencesManager.initializeInstance(getApplicationContext());
@@ -104,11 +125,8 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
         initialiserSwipeLayout();
         initialiserToolbar();
         initialiserDrawer();
-
-        if (isGrid) {
+        if (isGrid)
             InitialiserGridLayout();
-        }
-
         commencerRafraichissement();
     }
 
@@ -189,7 +207,6 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
         return super.onOptionsItemSelected(item);
     }
 
-
     /**
      * Initialise la toolbar. Elle est ajout�e et attach�e au layout
      */
@@ -246,22 +263,71 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
             GridLayoutManager gridLayoutManager = new GridLayoutManager(this, 3);
             _recyclelst_post.setLayoutManager(gridLayoutManager);
         }
-        _recyclelst_post.addOnScrollListener(new RecyclerView.OnScrollListener() {
+ _recyclelst_post.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                 if (!recyclerView.canScrollVertically(-1)) {
                     //Scroll at Top
                 } else if (!recyclerView.canScrollVertically(1)) {
                     //Scroll at bottom
+                    String url = mCurrentSubreddit.equals("Front Page") ? "" : mCurrentSubreddit;
+                    url += mCurrentFilter;
+                    url += ".json";
+                    url += "?after=" + mProchainePage;
 
+                    WebServiceClient.get(url, new RequestParams(), new JsonHttpResponseHandler() {
+                        @Override
+                        public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+                            FrontPage fp = new GsonBuilder().create().fromJson(response.toString(), FrontPage.class);
+                            mProchainePage = fp.data.after;
+
+                            for (FrontPage.Data.Children c : fp.data.children)
+                                ((PostAdapter) _recyclelst_post.getAdapter()).addItem(c);
+                        }
+                        @Override
+                        public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
+                            Toast.makeText(getApplicationContext(), "Error while parsing server data", Toast.LENGTH_LONG);
+                        }
+                    });
                 } else if (dy < 0) {
                     //Scroll up
                 } else if (dy > 0) {
                     //Scroll down
                 }
             }
-        });
-    }
+        });// Affiche l'image en centre d'écran.
+        _recyclelst_post.addOnItemTouchListener(new RecyclerEventListener(this, _recyclelst_post, new RecyclerEventListener.IEventListener(){
+            @Override
+            public void onClick(View view, int position) {
+                view.setDrawingCacheEnabled(true);
+                view.buildDrawingCache();
+
+                fullImage = (ImageView)findViewById(R.id.fullImage);
+                PostAdapter.PostViewHolder poste = new PostAdapter.PostViewHolder(view);
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    poste.progressBar.setTranslationZ(20);
+                }
+
+                fullImage.setVisibility(View.VISIBLE);
+                imageIsFullscreen = true;
+
+                new ImageLoader(fullImage, poste.progressBar, R.drawable.ic_action_alert_warning).execute((((PostAdapter) _recyclelst_post.getAdapter()).getItem(position).preview.images.get(0).source.url));
+
+                dimBackground.setBackgroundColor(Color.parseColor("#bf000000"));
+
+            }
+
+            @Override
+            public void onLongClick(View view, int position) {
+
+            }
+
+            @Override
+            public void onDoubleTap(View view, int position) {
+
+            }
+        }));    }
 
     /**
      * Initialise le drawer de navigation.
@@ -303,8 +369,7 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
     /**
      * 
      */
-    public void commencerRafraichissement()
-    {
+    public void commencerRafraichissement() {
         String url = mCurrentSubreddit.equals("Front Page") ? "" : mCurrentSubreddit;
         url += mCurrentFilter;
         url += ".json";
@@ -326,7 +391,6 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
             }
         });
     }
-
 
     /**
      * Permets de g�rer la sélection des items du drawer.
@@ -355,8 +419,13 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
     @Override
     public void onBackPressed() {
 
+        // Si l'image est full screen, on la rends visible
+        if (imageIsFullscreen) {
+            fullImage.setVisibility(View.INVISIBLE);
+            imageIsFullscreen = false;
+        }
         //Si le drawer est ouvert on le ferme
-        if (mDrawerLayout.isDrawerOpen(mDrawerRecyclerView))
+        else if (mDrawerLayout.isDrawerOpen(mDrawerRecyclerView))
             mDrawerLayout.closeDrawer(mDrawerRecyclerView);
         else if (mIsSearchActive)
             disableSearchMenu();
@@ -482,4 +551,9 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
         }
     }
 
+    public void onImageClick(View v) {
+        fullImage.setVisibility(View.INVISIBLE);
+        dimBackground.setBackgroundColor(Color.parseColor("#00FFFFFF"));
+
+    }
 }
