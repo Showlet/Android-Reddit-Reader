@@ -20,19 +20,23 @@
         android:title="@string/action_filter"
         android:icon="@drawable/ic_action_filter_white"
         app:showAsAction="ifRoom">
-        <menu>
+        <menu xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:app="http://schemas.android.com/apk/res-auto">
             <item
                 android:id="@+id/action_filter_hot"
                 android:icon="@drawable/ic_filter_hot"
-                android:title="@string/filter_hot"/>
+                android:title="@string/filter_hot"
+                android:checkable="true"/>
             <item
                 android:id="@+id/action_filter_new"
                 android:icon="@drawable/ic_filter_new"
-                android:title="@string/filter_new"/>
+                android:title="@string/filter_new"
+                android:checkable="true"/>
             <item
                 android:id="@+id/action_filter_rising"
                 android:icon="@drawable/ic_filter_trending"
-                android:title="@string/filter_rising"/>
+                android:title="@string/filter_rising"
+                android:checkable="true"/>
         </menu>
     </item>
 </menu>

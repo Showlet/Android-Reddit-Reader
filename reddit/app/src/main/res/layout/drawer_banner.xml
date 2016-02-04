@@ -11,37 +11,15 @@
         android:background="@drawable/banner"
         android:paddingTop="24dp">
 
-        <ImageView
-            android:id="@+id/avatar"
-            android:layout_width="64dp"
-            android:layout_height="64dp"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
-            android:layout_alignParentTop="true"
-            android:layout_marginBottom="8dp"
-            android:layout_marginLeft="16dp"
-            android:layout_marginTop="16dp" />
-
         <LinearLayout
             android:layout_width="fill_parent"
             android:layout_height="56dp"
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
-            android:layout_below="@+id/avatar"
             android:layout_marginBottom="8dp"
             android:layout_marginLeft="16dp"
             android:layout_marginRight="16dp"
             android:orientation="vertical">
-
-            <TextView
-                android:id="@+id/alias"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1"
-                android:text="Dr.Cholette"
-                android:textColor="#ffffff"
-                android:textSize="14sp"
-                android:textStyle="bold" />
         </LinearLayout>
     </RelativeLayout>
 </RelativeLayout>
