@@ -20,7 +20,6 @@ public class PreferencesManager {
     public static final String USER_AVATAR_PATH_KEY = "USER_AVATAR_PATH";
 
 
-
     /**
      * CTOR privé pouvent seulement être appelé par la méthode d'initialisation.
      * @param context Context de l'application

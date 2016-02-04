@@ -1,8 +1,8 @@
 package com.example.reddit;
 
 import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -11,16 +11,13 @@ import android.widget.Toast;
 
 import com.example.reddit.utilities.PreferencesManager;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-
 /**
  * TODO Initialiser les settings avec ceux sauvegarder
  */
 public class SettingActivity extends AppCompatActivity {
 
     private Toolbar mToolbar;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -28,8 +25,8 @@ public class SettingActivity extends AppCompatActivity {
 
         initialiserToolbar();
 
-        initialiserSpinner(R.id.setting_affichage_spinner, "List", "Grid");
-        initialiserSpinner(R.id.setting_nsfw_spinner, "On", "Off");
+        initialiserSpinner(R.id.setting_affichage_spinner, Settings.Interface, Settings.Interface_key);
+        initialiserSpinner(R.id.setting_nsfw_spinner, Settings.NSFW, Settings.NSFW_key);
     }
 
     /**
@@ -46,11 +43,20 @@ public class SettingActivity extends AppCompatActivity {
      * @param id
      * @param entries
      */
-    private void initialiserSpinner(int id, String... entries) {
+    private void initialiserSpinner(int id, String[] entries, String key) {
+
+        // Init
         Spinner spinner = (Spinner) findViewById(id);
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, entries);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapter);
+
+        // Met le spinner a la bonne position, si il y a deja un setting d'enregistre
+        PreferencesManager pm = PreferencesManager.getInstance();
+        String value = pm.getPreference(key).toString();
+        for (int i = 0; i < entries.length; i++)
+            if (value.equals(entries[i]))
+                spinner.setSelection(i);
     }
 
     /**
@@ -58,13 +64,15 @@ public class SettingActivity extends AppCompatActivity {
      * @param view
      */
     public void onClickSave(View view) {
+
         PreferencesManager pm = PreferencesManager.getInstance();
-        pm.setPreference("AFFICHAGE_SETTING", ((Spinner) findViewById(R.id.setting_affichage_spinner)).getSelectedItem().toString());
-        pm.setPreference("NSFW_SETTING", ((Spinner) findViewById(R.id.setting_nsfw_spinner)).getSelectedItem().toString());
 
-        Toast.makeText(this, "Affichage: " + pm.getPreference("AFFICHAGE_SETTING").toString(), Toast.LENGTH_LONG).show();
-        Toast.makeText(this, "NSFW: " + pm.getPreference("NSFW_SETTING").toString(), Toast.LENGTH_LONG).show();
+        pm.setPreference(Settings.Interface_key,
+                ((Spinner) findViewById(R.id.setting_affichage_spinner)).getSelectedItem().toString());
 
-        startActivity(new Intent(this,MainActivity.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK));
+        pm.setPreference(Settings.NSFW_key,
+                ((Spinner) findViewById(R.id.setting_nsfw_spinner)).getSelectedItem().toString());
+
+        startActivity(new Intent(this, MainActivity.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK));
     }
 }

@@ -2,29 +2,27 @@ package com.example.reddit;
 
 import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
+import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBar;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.view.KeyEvent;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.GridLayout;
 import android.widget.LinearLayout;
-import android.widget.TableLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import android.support.v7.app.ActionBarDrawerToggle;
-
-import android.support.v7.widget.Toolbar;
 
 import com.example.reddit.drawer.DrawerAdapter;
 import com.example.reddit.drawer.DrawerCallbacks;
@@ -36,12 +34,8 @@ import com.example.reddit.utilities.PreferencesManager;
 import com.example.reddit.utilities.WebServiceClient;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.loopj.android.http.JsonHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
-
-import android.view.Menu;
-import android.view.MenuItem;
 
 import org.json.JSONObject;
 
@@ -95,8 +89,8 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
         CacheManager.initializeInstance(getApplicationContext());
 
         // isGrid est la variable qui mets l'affichage en gridview ou en list.
-        String sadf = PreferencesManager.getInstance().getPreference("AFFICHAGE_SETTING");
-        isGrid = (sadf.equals("Grid"));
+        String interfaceType = PreferencesManager.getInstance().getPreference(Settings.Interface_key);
+        isGrid = (interfaceType.equals("Grid"));
         mCurrentURL = "https://www.reddit.com";
         mCurrentFilter = "/hot";
 
