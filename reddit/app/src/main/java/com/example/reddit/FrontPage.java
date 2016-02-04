@@ -50,6 +50,7 @@ public class FrontPage {
                 public String url;
                 public boolean visited;
                 public Preview preview;
+                public String thumbnail;
 
                 public class Preview {
                     public ArrayList<Image> images;

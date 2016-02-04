@@ -25,9 +25,6 @@ public class DrawerAdapter extends RecyclerView.Adapter<DrawerAdapter.ViewHolder
     private static final int VIEW_HOLDER_TYPE_HEADER = 0;
     private static final int VIEW_HOLDER_TYPE_ITEM = 1;
 
-    //Photo et display name du user
-    private int avatar;
-    private String alias;
 
     //Gestion des items
     private int mSelectedPosition;
@@ -42,15 +39,11 @@ public class DrawerAdapter extends RecyclerView.Adapter<DrawerAdapter.ViewHolder
      *
      * CTOR
      *
-     * @param Alias Nom d'affichage de l'utilisateur
-     * @param Avatar Image de l'utilisateur
      * @param drawerItems La liste d'item du drawer
      * @param callbacks L'object qui implement les callback
      */
-    public DrawerAdapter(String Alias, int Avatar, List<DrawerItem> drawerItems, DrawerCallbacks callbacks){
+    public DrawerAdapter(List<DrawerItem> drawerItems, DrawerCallbacks callbacks){
         this.mDrawerItems = drawerItems;
-        this.alias = Alias;
-        this.avatar = Avatar;
         this.mDrawerCallbacks = callbacks;
     }
 
@@ -96,24 +89,9 @@ public class DrawerAdapter extends RecyclerView.Adapter<DrawerAdapter.ViewHolder
                 viewHolderType = VIEW_HOLDER_TYPE_ITEM;
             }
             else{
-                //On crée la vue en utilisant drawer_banner.xml
-                Alias = (TextView) itemView.findViewById(R.id.alias);
-                Avatar = (ImageView) itemView.findViewById(R.id.avatar);
                 viewHolderType = VIEW_HOLDER_TYPE_HEADER;
             }
         }
-
-
-        /**
-         *
-         * Les opérations
-         *
-         * @param v La vue
-         */
-        //@Override
-        //public void onClick(View v) {
-            //Pour l'instance rien
-        //}
 
     }
 
@@ -212,11 +190,6 @@ public class DrawerAdapter extends RecyclerView.Adapter<DrawerAdapter.ViewHolder
             } else {
                viewHolder.itemView.setBackgroundColor(Color.TRANSPARENT); //Transparent parce que le background du drawer est déja de la bonne couleur.
             }
-        }
-        //Pour le header
-        else{
-            viewHolder.Avatar.setImageResource(avatar);
-            viewHolder.Alias.setText(alias);
         }
     }
 

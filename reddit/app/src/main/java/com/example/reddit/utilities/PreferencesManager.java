@@ -20,7 +20,6 @@ public class PreferencesManager {
     public static final String USER_AVATAR_PATH_KEY = "USER_AVATAR_PATH";
 
 
-
     /**
      * CTOR privé pouvent seulement être appelé par la méthode d'initialisation.
      * @param context Context de l'application
@@ -87,6 +86,28 @@ public class PreferencesManager {
      */
     public String getUserAvatarPath() {
         return mSharedPreferences.getString(USER_AVATAR_PATH_KEY, "Invalid Path");
+    }
+
+    /**
+     * Permet d'enregistrer un parametre
+     * @param Key
+     * @param Value
+     */
+    public void setPreference(String Key, String Value)
+    {
+        mSharedPreferences.edit()
+                .putString(Key, Value)
+                .apply();
+    }
+
+    /**
+     * Permet de retrouve un parametre enregistrer
+     * @param Key
+     * @return
+     */
+    public String getPreference(String Key)
+    {
+        return mSharedPreferences.getString(Key, "Invalid Key");
     }
 
     /**

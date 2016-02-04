@@ -10,20 +10,33 @@
     <item
         android:id="@+id/action_search"
         android:orderInCategory="200"
-        android:title="Search"
+        android:title="@string/action_search"
         android:icon="@drawable/ic_action_search_white"
         app:showAsAction="ifRoom"/>
 
     <item
         android:id="@+id/action_filter"
         android:orderInCategory="300"
-        android:title="User"
+        android:title="@string/action_filter"
         android:icon="@drawable/ic_action_filter_white"
         app:showAsAction="ifRoom">
-        <menu>
-            <item android:id="@+id/ic_filter_hot" android:title="@string/filter_hot"/>
-            <item android:id="@+id/ic_filter_new" android:title="@string/filter_new"/>
-            <item android:id="@+id/ic_filter_rising" android:title="@string/filter_rising"/>
+        <menu xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:app="http://schemas.android.com/apk/res-auto">
+            <item
+                android:id="@+id/action_filter_hot"
+                android:icon="@drawable/ic_filter_hot"
+                android:title="@string/filter_hot"
+                android:checkable="true"/>
+            <item
+                android:id="@+id/action_filter_new"
+                android:icon="@drawable/ic_filter_new"
+                android:title="@string/filter_new"
+                android:checkable="true"/>
+            <item
+                android:id="@+id/action_filter_rising"
+                android:icon="@drawable/ic_filter_trending"
+                android:title="@string/filter_rising"
+                android:checkable="true"/>
         </menu>
     </item>
 </menu>
