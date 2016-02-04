@@ -253,7 +253,25 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
                     //Scroll at Top
                 } else if (!recyclerView.canScrollVertically(1)) {
                     //Scroll at bottom
+                    String url = mCurrentSubreddit.equals("Front Page") ? "" : mCurrentSubreddit;
+                    url += mCurrentFilter;
+                    url += ".json";
+                    url += "?after=" + mProchainePage;
 
+                    WebServiceClient.get(url, new RequestParams(), new JsonHttpResponseHandler() {
+                        @Override
+                        public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+                            FrontPage fp = new GsonBuilder().create().fromJson(response.toString(), FrontPage.class);
+                            mProchainePage = fp.data.after;
+
+                            for (FrontPage.Data.Children c : fp.data.children)
+                                ((PostAdapter) _recyclelst_post.getAdapter()).addItem(c);
+                        }
+                        @Override
+                        public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
+                            Toast.makeText(getApplicationContext(), "Error while parsing server data", Toast.LENGTH_LONG);
+                        }
+                    });
                 } else if (dy < 0) {
                     //Scroll up
                 } else if (dy > 0) {

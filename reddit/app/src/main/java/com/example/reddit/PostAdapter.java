@@ -36,6 +36,12 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
         return _LstPost.get(pos).data;
     }
 
+    public void addItem(FrontPage.Data.Children post)
+    {
+        _LstPost.add(post);
+        notifyItemInserted(_LstPost.size() - 1);
+    }
+
     @Override
     public PostViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         if(IsGrid) {
