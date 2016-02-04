@@ -8,7 +8,8 @@
     card_view:cardCornerRadius="0dp"
     android:layout_rowSpan="2"
     card_view:cardElevation="5dp"
-    android:layout_margin="6dp">
+    android:layout_margin="6dp"
+    android:onClick="onClick">
 
     <GridLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:orientation="vertical"

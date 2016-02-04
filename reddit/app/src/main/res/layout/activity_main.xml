@@ -7,6 +7,16 @@
     android:elevation="7dp"
     android:fitsSystemWindows="true">
 
+    <ProgressBar
+        android:id="@+id/imgProgress"
+        style="?android:attr/progressBarStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:layout_gravity="center"
+        android:layout_margin="50dp"
+        android:layout_row="2" />
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -16,20 +26,17 @@
             android:id="@+id/action_bar"
             layout="@layout/action_bar"></include>
 
-
         <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
             android:id="@+id/linearLayout"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:visibility="gone"
-            android:orientation="vertical">
-
+            android:orientation="vertical"
+            android:visibility="gone">
 
             <android.support.v4.widget.SwipeRefreshLayout
                 android:id="@+id/swipe_user_linear"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
-
                 <android.support.v7.widget.RecyclerView
                     android:id="@+id/recyclelist_post_linear"
                     android:layout_width="match_parent"
@@ -52,6 +59,8 @@
                 android:id="@+id/swipe_user_grid"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:layout_column="0"
+                android:layout_row="0"
                 android:layout_rowSpan="2">
 
                 <android.support.v7.widget.RecyclerView
@@ -61,6 +70,37 @@
             </android.support.v4.widget.SwipeRefreshLayout>
         </GridLayout>
     </LinearLayout>
+
+        <FrameLayout
+            android:id="@+id/frameLayout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_column="0"
+            android:layout_row="1">
+
+            <ImageView
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:id="@+id/dimBackground"
+                android:layout_gravity="center" />
+
+            <ImageView
+                android:id="@+id/fullImage"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="top|bottom|center_horizontal"
+                android:layout_marginBottom="25dp"
+                android:layout_marginLeft="40dp"
+                android:layout_marginRight="40dp"
+                android:layout_marginTop="25dp"
+                android:adjustViewBounds="true"
+                android:elevation="20dp"
+                android:keepScreenOn="false"
+                android:onClick="onImageClick"
+                android:src="@drawable/avatar"
+                android:translationZ="20dp"
+                android:visibility="invisible" />
+        </FrameLayout>
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/DrawerRecycler"

@@ -60,6 +60,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
         holder.imgImage.setImageBitmap(null);
         holder.imgImage.setBackground(null);
         holder.imgImage.setBackgroundResource(R.drawable.defaultimg);
+        holder.imagePost = post;
 
         String urlpreview = null;
 
@@ -76,6 +77,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
         protected ImageView imgImage;
         protected TextView tvUser;
         protected ProgressBar progressBar;
+        protected FrontPage.Data.Children imagePost;
 
         public PostViewHolder(View v) {
             super(v);
