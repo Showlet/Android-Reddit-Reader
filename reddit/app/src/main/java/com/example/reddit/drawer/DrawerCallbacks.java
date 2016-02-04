@@ -2,7 +2,7 @@ package com.example.reddit.drawer;
 
 /**
  *
- * Interface pour les callback du drawer
+ * INTERFACE pour les callback du drawer
  *
  * Created by Maxim on 1/30/2016.
  */

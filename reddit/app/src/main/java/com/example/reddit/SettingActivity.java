@@ -7,7 +7,6 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
-import android.widget.Toast;
 
 import com.example.reddit.utilities.PreferencesManager;
 
@@ -25,7 +24,7 @@ public class SettingActivity extends AppCompatActivity {
 
         initialiserToolbar();
 
-        initialiserSpinner(R.id.setting_affichage_spinner, Settings.Interface, Settings.Interface_key);
+        initialiserSpinner(R.id.setting_affichage_spinner, Settings.INTERFACE, Settings.INTERFACE_KEY);
         initialiserSpinner(R.id.setting_nsfw_spinner, Settings.NSFW, Settings.NSFW_key);
     }
 
@@ -67,7 +66,7 @@ public class SettingActivity extends AppCompatActivity {
 
         PreferencesManager pm = PreferencesManager.getInstance();
 
-        pm.setPreference(Settings.Interface_key,
+        pm.setPreference(Settings.INTERFACE_KEY,
                 ((Spinner) findViewById(R.id.setting_affichage_spinner)).getSelectedItem().toString());
 
         pm.setPreference(Settings.NSFW_key,

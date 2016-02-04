@@ -89,7 +89,7 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
         CacheManager.initializeInstance(getApplicationContext());
 
         // isGrid est la variable qui mets l'affichage en gridview ou en list.
-        String interfaceType = PreferencesManager.getInstance().getPreference(Settings.Interface_key);
+        String interfaceType = PreferencesManager.getInstance().getPreference(Settings.INTERFACE_KEY);
         isGrid = (interfaceType.equals("Grid"));
         mCurrentURL = "https://www.reddit.com";
         mCurrentFilter = "/hot";
