@@ -327,7 +327,8 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
             public void onDoubleTap(View view, int position) {
 
             }
-        }));    }
+        }));
+    }
 
     /**
      * Initialise le drawer de navigation.
