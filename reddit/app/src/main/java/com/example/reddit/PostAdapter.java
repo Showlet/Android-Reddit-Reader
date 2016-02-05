@@ -8,6 +8,8 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import org.w3c.dom.Text;
+
 import java.util.List;
 
 /**
@@ -60,7 +62,14 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
     @Override
     public void onBindViewHolder(PostViewHolder holder, int position) {
         FrontPage.Data.Children post = _LstPost.get(position);
+
+        if(post.data.over_18)
+            holder.tvNSFW.setVisibility(View.VISIBLE);
+        else
+            holder.tvNSFW.setVisibility(View.GONE);
+
         holder.tvTitle.setText(post.data.title);
+
         holder.tvSubreddit.setText("/r/" + post.data.subreddit);
 
         holder.imgImage.setImageBitmap(null);
@@ -80,6 +89,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
     public static class PostViewHolder extends RecyclerView.ViewHolder {
         protected TextView tvTitle;
         protected TextView tvSubreddit;
+        protected TextView tvNSFW;
         protected ImageView imgImage;
         protected ProgressBar progressBar;
         protected FrontPage.Data.Children imagePost;
@@ -88,8 +98,10 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
             super(v);
             tvTitle = (TextView) v.findViewById(R.id.txtPostTitle);
             tvSubreddit = (TextView) v.findViewById(R.id.txtPostSubreddit);
+            tvNSFW = (TextView) v.findViewById(R.id.txtNSFW);
             imgImage = (ImageView) v.findViewById(R.id.imgPostMedia);
             progressBar = (ProgressBar) v.findViewById(R.id.imgProgress);
+            this.setIsRecyclable(false);
         }
     }
 }

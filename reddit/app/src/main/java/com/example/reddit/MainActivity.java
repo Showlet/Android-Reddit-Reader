@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Build;
 import android.support.v4.widget.DrawerLayout;
@@ -33,6 +34,9 @@ import com.example.reddit.drawer.DrawerCallbacks;
 import com.example.reddit.drawer.DrawerItem;
 import com.example.reddit.utilities.*;
 import com.example.reddit.utilities.ImageLoader;
+import com.google.android.gms.appindexing.Action;
+import com.google.android.gms.appindexing.AppIndex;
+import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.gson.GsonBuilder;
 import com.loopj.android.http.JsonHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
@@ -79,6 +83,11 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
     private ImageView fullImage;
     private boolean imageIsFullscreen;
     private ImageView dimBackground;
+    /**
+     * ATTENTION: This was auto-generated to implement the App Indexing API.
+     * See https://g.co/AppIndexing/AndroidStudio for more information.
+     */
+    private GoogleApiClient client;
 
     /**
      * � la cr�ation de l'activit� (NO SHIT)
@@ -86,7 +95,7 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
      * @param savedInstanceState
      */
     @Override
-    protected void onCreate( Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -118,6 +127,9 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
         if (isGrid)
             InitialiserGridLayout();
         commencerRafraichissement();
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
     }
 
     /**
@@ -240,6 +252,7 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
      * Initialise le RecyclerView
      */
     private void initialiserRecyclerView() {
+
         if (!isGrid) {
             linearLayout = (LinearLayout) findViewById(R.id.linearLayout);
             linearLayout.setVisibility(View.VISIBLE);
@@ -255,49 +268,16 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
             GridLayoutManager gridLayoutManager = new GridLayoutManager(this, 3);
             _recyclelst_post.setLayoutManager(gridLayoutManager);
         }
- _recyclelst_post.addOnScrollListener(new RecyclerView.OnScrollListener() {
+        _recyclelst_post.setHasFixedSize(true);
+
+        _recyclelst_post.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                 if (!recyclerView.canScrollVertically(-1)) {
                     //Scroll at Top
                 } else if (!recyclerView.canScrollVertically(1)) {
                     //Scroll at bottom
-                    String url = mCurrentSubreddit.equals("Front Page") ? "" : mCurrentSubreddit;
-                    url += mCurrentFilter;
-                    url += ".json";
-                    url += "?after=" + mProchainePage;
-
-                    WebServiceClient.get(url, new RequestParams(), new JsonHttpResponseHandler() {
-                        /**
-                         *
-                         * Override pour défénir les actions si la requête est un échec
-                         *
-                         * @param statusCode Le code de status de la requête web.
-                         * @param headers L'entête de la requête web
-                         * @param response La réponse
-                         */
-                        @Override
-                        public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
-                            FrontPage fp = new GsonBuilder().create().fromJson(response.toString(), FrontPage.class);
-                            mProchainePage = fp.data.after;
-
-                            for (FrontPage.Data.Children c : fp.data.children)
-                                ((PostAdapter) _recyclelst_post.getAdapter()).addItem(c);
-                        }
-                        /**
-                         *
-                         * Override pour défénir les actions si la requête est un échec
-                         *
-                         * @param statusCode Le code de status de la requête web.
-                         * @param headers L'entête de la requête web
-                         * @param throwable Wrapper l'information de l'erreur
-                         * @param errorResponse Le message d'erreur
-                         */
-                        @Override
-                        public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
-                            Toast.makeText(getApplicationContext(), "Error while parsing server data", Toast.LENGTH_LONG);
-                        }
-                    });
+                    allerProchainePage();
                 } else if (dy < 0) {
                     //Scroll up
                 } else if (dy > 0) {
@@ -312,7 +292,8 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
                 view.setDrawingCacheEnabled(true);
                 view.buildDrawingCache();
 
-                fullImage = (ImageView)findViewById(R.id.fullImage);
+
+                fullImage = (ImageView) findViewById(R.id.fullImage);
                 PostAdapter.PostViewHolder poste = new PostAdapter.PostViewHolder(view);
 
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -325,7 +306,6 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
                 new ImageLoader(fullImage, poste.progressBar, R.drawable.ic_action_alert_warning).execute((((PostAdapter) _recyclelst_post.getAdapter()).getItem(position).preview.images.get(0).source.url));
 
                 dimBackground.setBackgroundColor(Color.parseColor("#bf000000"));
-
             }
 
             @Override
@@ -342,10 +322,11 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
              */
             @Override
             public void onDoubleTap(View view, int position) {
-                Intent intent = new Intent(MainActivity.this,CommentsActivity.class);
-                //intent.addFlags(Intent.FLA);
 
-                intent.putExtra("postId",((PostAdapter)_recyclelst_post.getAdapter()).getItem(position).id);
+                Intent intent = new Intent(MainActivity.this,CommentsActivity.class);
+
+
+                intent.putExtra("postId", ((PostAdapter) _recyclelst_post.getAdapter()).getItem(position).id);
                 startActivity(intent);
             }
         }));
@@ -358,12 +339,13 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
 
         //On va g�rer sa diff�rament c'est juste pour tester.
         List<DrawerItem> drawerMenuItem = new ArrayList<DrawerItem>();
-        drawerMenuItem.add(new DrawerItem("Front Page","https://www.reddit.com",R.drawable.ic_action_trending_up));
-        drawerMenuItem.add(new DrawerItem("/r/programming","https://www.reddit.com/r/programming",R.drawable.ic_action_trending_up));
-        drawerMenuItem.add(new DrawerItem("/r/gonewild","https://www.reddit.com/r/gonewild",R.drawable.ic_action_trending_up));
-        drawerMenuItem.add(new DrawerItem("/r/funny","https://www.reddit.com/r/funny",R.drawable.ic_action_trending_up));
-        drawerMenuItem.add(new DrawerItem("/r/aww","https://www.reddit.com/r/aww",R.drawable.ic_action_trending_up));
-        drawerMenuItem.add(new DrawerItem("/r/ama","https://www.reddit.com/r/ama",R.drawable.ic_action_trending_up));
+        drawerMenuItem.add(new DrawerItem("Front Page", "https://www.reddit.com", R.drawable.ic_action_trending_up));
+        drawerMenuItem.add(new DrawerItem("/r/programming", "https://www.reddit.com/r/programming", R.drawable.ic_action_trending_up));
+        drawerMenuItem.add(new DrawerItem("/r/gonewild", "https://www.reddit.com/r/gonewild", R.drawable.ic_action_trending_up));
+        drawerMenuItem.add(new DrawerItem("/r/funny", "https://www.reddit.com/r/funny", R.drawable.ic_action_trending_up));
+        drawerMenuItem.add(new DrawerItem("/r/aww", "https://www.reddit.com/r/aww", R.drawable.ic_action_trending_up));
+        drawerMenuItem.add(new DrawerItem("/r/ama", "https://www.reddit.com/r/ama", R.drawable.ic_action_trending_up));
+        drawerMenuItem.add(new DrawerItem("/r/WTF", "https://www.reddit.com/r/wtf", R.drawable.ic_action_trending_up));
 
 
         //On assigne le recycler � la vue,
@@ -372,7 +354,7 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
         mDrawerRecyclerView.setHasFixedSize(true);
 
         //Cr�ation de l'adapteur.
-        mDrawerAdapter = new DrawerAdapter(drawerMenuItem,this);
+        mDrawerAdapter = new DrawerAdapter(drawerMenuItem, this);
         mDrawerRecyclerView.setAdapter(mDrawerAdapter);
 
         //Cr�ation du layout manager pour g�rer le drawer
@@ -388,7 +370,7 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
     }
 
     /**
-     * 
+     *
      */
     public void commencerRafraichissement() {
         String url = mCurrentSubreddit.equals("Front Page") ? "" : mCurrentSubreddit;
@@ -401,6 +383,18 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                 FrontPage fp = new GsonBuilder().create().fromJson(response.toString(), FrontPage.class);
                 mProchainePage = fp.data.after;
+
+                // Si on a desactiver les post NSFW
+                if (PreferencesManager.getInstance().getPreference(Settings.NSFW_key).equals("Off")) {
+                    ArrayList<FrontPage.Data.Children> lstToRemove = new ArrayList<>();
+
+                    for (int i = 0; i < fp.data.children.size(); i++)
+                        if (fp.data.children.get(i).data.over_18)
+                            lstToRemove.add(fp.data.children.get(i));
+
+                    fp.data.children.removeAll(lstToRemove);
+                }
+
                 _recyclelst_post.setAdapter(new PostAdapter(fp.data.children, isGrid));
                 _swipe_layout.setRefreshing(false);
             }
@@ -409,6 +403,48 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
             public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
                 Toast.makeText(getApplicationContext(), "Error while parsing server data", Toast.LENGTH_LONG);
                 _swipe_layout.setRefreshing(false);
+            }
+        });
+    }
+
+    public void allerProchainePage() {
+        String url = mCurrentSubreddit.equals("Front Page") ? "" : mCurrentSubreddit;
+        url += mCurrentFilter;
+        url += ".json";
+        url += "?after=" + mProchainePage;
+
+        WebServiceClient.get(url, new RequestParams(), new JsonHttpResponseHandler() {
+            /**
+             * Override pour défénir les actions si la requête est un échec
+             *
+             * @param statusCode Le code de status de la requête web.
+             * @param headers L'entête de la requête web
+             * @param response La réponse
+             */
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+                FrontPage fp = new GsonBuilder().create().fromJson(response.toString(), FrontPage.class);
+                mProchainePage = fp.data.after;
+                for (FrontPage.Data.Children c : fp.data.children) {
+                    if (PreferencesManager.getInstance().getPreference(Settings.NSFW_key).equals("Off")) {
+                        if (!c.data.over_18)
+                            ((PostAdapter) _recyclelst_post.getAdapter()).addItem(c);
+                    } else
+                        ((PostAdapter) _recyclelst_post.getAdapter()).addItem(c);
+                }
+            }
+
+            /**
+             * Override pour défénir les actions si la requête est un échec
+             *
+             * @param statusCode Le code de status de la requête web.
+             * @param headers L'entête de la requête web
+             * @param throwable Wrapper l'information de l'erreur
+             * @param errorResponse Le message d'erreur
+             */
+            @Override
+            public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
+                Toast.makeText(getApplicationContext(), "Error while parsing server data", Toast.LENGTH_LONG);
             }
         });
     }
@@ -448,7 +484,7 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
         //Si le drawer est ouvert on le ferme
         else if (mDrawerLayout.isDrawerOpen(mDrawerRecyclerView))
             mDrawerLayout.closeDrawer(mDrawerRecyclerView);
-        //Si la recherche est active on la désactive
+            //Si la recherche est active on la désactive
         else if (mIsSearchActive)
             disableSearchMenu();
         else
@@ -458,6 +494,7 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
     /**
      * M�thode qui active l'action de recherche dans la toolbar
      */
+
     private void enableSearchMenu() {
         //On retrouve l'action bar
         ActionBar actionBar = getSupportActionBar();
@@ -557,6 +594,18 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
                 @Override
                 public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                     FrontPage fp = new GsonBuilder().create().fromJson(response.toString(), FrontPage.class);
+
+                    // Si on a desactiver les post NSFW
+                    if(PreferencesManager.getInstance().getPreference(Settings.NSFW_key).equals("Off")) {
+                        ArrayList<FrontPage.Data.Children> lstToRemove = new ArrayList<>();
+
+                        for (int i = 0; i < fp.data.children.size(); i++)
+                            if (fp.data.children.get(i).data.over_18)
+                                lstToRemove.add(fp.data.children.get(i));
+
+                        fp.data.children.removeAll(lstToRemove);
+                    }
+
                     _recyclelst_post.setAdapter(new PostAdapter(fp.data.children, isGrid));
                     _swipe_layout.setRefreshing(false);
                 }
@@ -621,5 +670,45 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
     public void onImageClick(View v) {
         fullImage.setVisibility(View.INVISIBLE);
         dimBackground.setBackgroundColor(Color.parseColor("#00FFFFFF"));
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        client.connect();
+        Action viewAction = Action.newAction(
+                Action.TYPE_VIEW, // TODO: choose an action type.
+                "Main Page", // TODO: Define a title for the content shown.
+                // TODO: If you have web page content that matches this app activity's content,
+                // make sure this auto-generated web page URL is correct.
+                // Otherwise, set the URL to null.
+                Uri.parse("http://host/path"),
+                // TODO: Make sure this auto-generated app deep link URI is correct.
+                Uri.parse("android-app://com.example.reddit/http/host/path")
+        );
+        AppIndex.AppIndexApi.start(client, viewAction);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        Action viewAction = Action.newAction(
+                Action.TYPE_VIEW, // TODO: choose an action type.
+                "Main Page", // TODO: Define a title for the content shown.
+                // TODO: If you have web page content that matches this app activity's content,
+                // make sure this auto-generated web page URL is correct.
+                // Otherwise, set the URL to null.
+                Uri.parse("http://host/path"),
+                // TODO: Make sure this auto-generated app deep link URI is correct.
+                Uri.parse("android-app://com.example.reddit/http/host/path")
+        );
+        AppIndex.AppIndexApi.end(client, viewAction);
+        client.disconnect();
     }
 }
