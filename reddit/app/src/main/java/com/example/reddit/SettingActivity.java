@@ -34,6 +34,8 @@ public class SettingActivity extends AppCompatActivity {
     private void initialiserToolbar() {
         mToolbar = (Toolbar) findViewById(R.id.action_bar);
         setSupportActionBar(mToolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
     }
 
     /**
