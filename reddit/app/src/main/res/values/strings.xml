@@ -9,4 +9,8 @@
     <string name="filter_hot">Hot</string>
     <string name="filter_new">New</string>
     <string name="filter_rising">Rising</string>
+
+    <string name="title_activity_image_fullscreen">ImageFullscreenActivity</string>
+    <string name="dummy_button">Dummy Button</string>
+    <string name="dummy_content">DUMMY\nCONTENT</string>
 </resources>
