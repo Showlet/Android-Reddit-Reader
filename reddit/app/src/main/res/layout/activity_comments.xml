@@ -8,7 +8,9 @@
     android:paddingRight="0dp"
     android:paddingTop="0dp"
     tools:context=".CommentsActivity">
-
+    <include
+        android:id="@+id/action_bar"
+        layout="@layout/action_bar"></include>
     <WebView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

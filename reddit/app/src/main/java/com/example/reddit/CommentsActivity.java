@@ -3,15 +3,19 @@ package com.example.reddit;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Toast;
+
 
 /**
  * Activité pour afficher les commentaires d'un post reddit
  * Created by Maxim on 02/5/2016.
  */
 public class CommentsActivity extends AppCompatActivity {
+
+    private Toolbar mToolbar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -22,9 +26,21 @@ public class CommentsActivity extends AppCompatActivity {
         Intent intent = getIntent();
         String postId = intent.getStringExtra("postId");
 
+        initialiserToolbar();
         displayPostComments(postId);
     }
 
+
+    /**
+     * Initialise la toolbar. Elle est ajoutée et attach�e au layout
+     */
+    private void initialiserToolbar() {
+        mToolbar = (Toolbar) findViewById(R.id.action_bar);
+        setTitle("Commentaires");
+        setSupportActionBar(mToolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
+    }
 
     /**
      *

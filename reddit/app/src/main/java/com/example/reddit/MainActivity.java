@@ -1,5 +1,6 @@
 package com.example.reddit;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
@@ -60,13 +61,13 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
 
     private LinearLayoutManager linearLayoutManager;
     private LinearLayout linearLayout;
-    private RecyclerView.LayoutManager mDrawerLayoutManager;
 
     //Drawer
     private RecyclerView mDrawerRecyclerView;
     private RecyclerView.Adapter mDrawerAdapter;
     private DrawerLayout mDrawerLayout;
     private ActionBarDrawerToggle mActionBarDrawerToggleToggle;
+    private RecyclerView.LayoutManager mDrawerLayoutManager;
 
 
     // DerniereURL utilise
@@ -110,7 +111,7 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
         // isGrid est la variable qui mets l'affichage en gridview ou en list.
         String interfaceType = PreferencesManager.getInstance().getPreference(Settings.INTERFACE_KEY);
         isGrid = (interfaceType.equals("Grid"));
-        mCurrentSubreddit = "";
+        mCurrentSubreddit = "Front Page";
         mCurrentFilter = "/hot";
 
 
@@ -177,6 +178,7 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
                 mFilterAction.getSubMenu().findItem(R.id.action_filter_new).setChecked(false);
                 mFilterAction.getSubMenu().findItem(R.id.action_filter_rising).setChecked(false);
                 item.setChecked(true);
+                setTitle(mCurrentSubreddit + mCurrentFilter);
                 commencerRafraichissement();
                 return true;
             case R.id.action_filter_new:
@@ -184,6 +186,7 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
                 mFilterAction.getSubMenu().findItem(R.id.action_filter_hot).setChecked(false);
                 mFilterAction.getSubMenu().findItem(R.id.action_filter_rising).setChecked(false);
                 item.setChecked(true);
+                setTitle(mCurrentSubreddit + mCurrentFilter);
                 commencerRafraichissement();
                 return true;
             case R.id.action_filter_rising:
@@ -191,6 +194,7 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
                 mFilterAction.getSubMenu().findItem(R.id.action_filter_new).setChecked(false);
                 mFilterAction.getSubMenu().findItem(R.id.action_filter_hot).setChecked(false);
                 item.setChecked(true);
+                setTitle(mCurrentSubreddit + mCurrentFilter);
                 commencerRafraichissement();
                 return true;
             case R.id.action_settings:
@@ -204,7 +208,6 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
                     enableSearchMenu();
                 return true;
         }
-
         return super.onOptionsItemSelected(item);
     }
 
@@ -281,10 +284,9 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
                     //Scroll down
                 }
             }
-        });
+        });// Affiche l'image en centre d'écran.
 
-        // Affiche l'image en centre d'écran.
-        _recyclelst_post.addOnItemTouchListener(new RecyclerEventListener(this, _recyclelst_post, new RecyclerEventListener.IEventListener() {
+        _recyclelst_post.addOnItemTouchListener(new RecyclerEventListener(this, _recyclelst_post, new RecyclerEventListener.IEventListener(){
             @Override
             public void onClick(View view, int position) {
                 view.setDrawingCacheEnabled(true);
@@ -320,8 +322,9 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
              */
             @Override
             public void onDoubleTap(View view, int position) {
-                Intent intent = new Intent(getApplicationContext(), CommentsActivity.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+                Intent intent = new Intent(MainActivity.this,CommentsActivity.class);
+
 
                 intent.putExtra("postId", ((PostAdapter) _recyclelst_post.getAdapter()).getItem(position).id);
                 startActivity(intent);
@@ -343,6 +346,8 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
         drawerMenuItem.add(new DrawerItem("/r/aww", "https://www.reddit.com/r/aww", R.drawable.ic_action_trending_up));
         drawerMenuItem.add(new DrawerItem("/r/ama", "https://www.reddit.com/r/ama", R.drawable.ic_action_trending_up));
         drawerMenuItem.add(new DrawerItem("/r/WTF", "https://www.reddit.com/r/wtf", R.drawable.ic_action_trending_up));
+        drawerMenuItem.add(new DrawerItem("/r/Random", "https://www.reddit.com/r/random", R.drawable.ic_action_trending_up));
+        drawerMenuItem.add(new DrawerItem("/r/Randnsfw", "https://www.reddit.com/r/randnsfw", R.drawable.ic_action_trending_up));
 
 
         //On assigne le recycler � la vue,
@@ -499,6 +504,7 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
         //On active et affiche la custom view.
         actionBar.setDisplayShowCustomEnabled(true);
         actionBar.setCustomView(R.layout.search_bar);
+
         //On masque le titre pour faire plus d'espace
         actionBar.setDisplayShowTitleEnabled(false);
 
@@ -561,9 +567,18 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
      * Fait une recherche sur le site de reddit afin d'obtenir les posts répondant au critère de recherche
      */
     private void doSearch() {
-        if (mCurrentSubreddit != null) {
+        String searchQuery = mSearchBox.getText().toString();
+
+        //Permet d'accéder a un subreddit
+        if(searchQuery.contains("/r/"))
+        {
+            mCurrentSubreddit = searchQuery;
+            setTitle(mCurrentSubreddit + mCurrentFilter);
+            commencerRafraichissement();
+        }
+        else if (mCurrentSubreddit != null) {
             RequestParams requestParams = new RequestParams();
-            requestParams.add("q", mSearchBox.getText().toString());
+            requestParams.add("q", searchQuery);
             requestParams.add("restrict_sr", "on");
             requestParams.add("sort", "relevance");
             requestParams.add("t", "all");
@@ -615,7 +630,7 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
         } else {
             //Ajoutes les paramètres de recherche.
             RequestParams requestParams = new RequestParams();
-            requestParams.add("q", mSearchBox.getText().toString());
+            requestParams.add("q", searchQuery);
             requestParams.add("restrict_sr", "off");
             requestParams.add("sort", "relevance");
             requestParams.add("t", "all");
@@ -657,7 +672,6 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
     public void onImageClick(View v) {
         fullImage.setVisibility(View.INVISIBLE);
         dimBackground.setBackgroundColor(Color.parseColor("#00FFFFFF"));
-
     }
 
     @Override
