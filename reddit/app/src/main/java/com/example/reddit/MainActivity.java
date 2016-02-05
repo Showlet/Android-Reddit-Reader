@@ -346,6 +346,8 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
         drawerMenuItem.add(new DrawerItem("/r/aww", "https://www.reddit.com/r/aww", R.drawable.ic_action_trending_up));
         drawerMenuItem.add(new DrawerItem("/r/ama", "https://www.reddit.com/r/ama", R.drawable.ic_action_trending_up));
         drawerMenuItem.add(new DrawerItem("/r/WTF", "https://www.reddit.com/r/wtf", R.drawable.ic_action_trending_up));
+        drawerMenuItem.add(new DrawerItem("/r/Random", "https://www.reddit.com/r/random", R.drawable.ic_action_trending_up));
+        drawerMenuItem.add(new DrawerItem("/r/Randnsfw", "https://www.reddit.com/r/randnsfw", R.drawable.ic_action_trending_up));
 
 
         //On assigne le recycler � la vue,
