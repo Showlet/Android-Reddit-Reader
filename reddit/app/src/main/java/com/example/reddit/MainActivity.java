@@ -7,8 +7,10 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Build;
+import android.provider.CalendarContract;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBar;
@@ -19,6 +21,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.style.BackgroundColorSpan;
 import android.support.v7.widget.Toolbar;
+import android.view.Display;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.LayoutInflater;
@@ -28,6 +31,9 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.GridLayout;
@@ -84,11 +90,12 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
     private boolean isGrid;
     private GridLayout gridLayout;
 
-    // Fullscreen image
+    // Fullscreen image/web
     private ImageView fullImage;
-    private boolean imageIsFullscreen;
+    private boolean contentIsFullScreen;
     private DrawerLayout drawerLayout;
     private ImageView dimBackground;
+    private WebView fullWeb;
 
     /**
      * � la cr�ation de l'activit� (NO SHIT)
@@ -96,7 +103,7 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
      * @param savedInstanceState
      */
     @Override
-    protected void onCreate( Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -263,7 +270,7 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
             GridLayoutManager gridLayoutManager = new GridLayoutManager(this, 3);
             _recyclelst_post.setLayoutManager(gridLayoutManager);
         }
- _recyclelst_post.addOnScrollListener(new RecyclerView.OnScrollListener() {
+        _recyclelst_post.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                 if (!recyclerView.canScrollVertically(-1)) {
@@ -284,6 +291,7 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
                             for (FrontPage.Data.Children c : fp.data.children)
                                 ((PostAdapter) _recyclelst_post.getAdapter()).addItem(c);
                         }
+
                         @Override
                         public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
                             Toast.makeText(getApplicationContext(), "Error while parsing server data", Toast.LENGTH_LONG);
@@ -296,26 +304,83 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
                 }
             }
         });// Affiche l'image en centre d'écran.
-        _recyclelst_post.addOnItemTouchListener(new RecyclerEventListener(this, _recyclelst_post, new RecyclerEventListener.IEventListener(){
+        _recyclelst_post.addOnItemTouchListener(new RecyclerEventListener(this, _recyclelst_post, new RecyclerEventListener.IEventListener() {
             @Override
             public void onClick(View view, int position) {
                 view.setDrawingCacheEnabled(true);
                 view.buildDrawingCache();
 
-                fullImage = (ImageView)findViewById(R.id.fullImage);
+                // Le state sert a decider si le post est une image, gif ou
+                int state = 3;
+                String url = ((PostAdapter) _recyclelst_post.getAdapter()).getItem(position).url;
                 PostAdapter.PostViewHolder poste = new PostAdapter.PostViewHolder(view);
 
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    poste.progressBar.setTranslationZ(20);
+                contentIsFullScreen = true;
+                dimBackground.setVisibility(View.VISIBLE);
+
+                fullImage = (ImageView) findViewById(R.id.fullImage);
+                fullWeb = (WebView) findViewById(R.id.fullWeb);
+
+                fullWeb.getSettings().setBuiltInZoomControls(true);
+                fullWeb.getSettings().setJavaScriptEnabled(true);
+                fullWeb.setInitialScale(1);
+                fullWeb.getSettings().setLoadWithOverviewMode(true);
+                fullWeb.getSettings().setUseWideViewPort(true);
+                fullWeb.getSettings().setJavaScriptCanOpenWindowsAutomatically(false);
+                fullWeb.getSettings().setSupportMultipleWindows(false);
+                fullWeb.getSettings().setUserAgentString("Mozilla/5.0 (iPhone; U; CPU like Mac OS X; en) AppleWebKit/420+ (KHTML, like Gecko) Version/3.0 Mobile/1A543a Safari/419.3");
+                fullWeb.setBackgroundColor(Color.TRANSPARENT);
+                fullWeb.setWebViewClient(new WebViewClient() {
+                    @Override
+                    public boolean shouldOverrideUrlLoading(WebView view, String url) {
+                        return false;
+                    }
+                });
+
+                if (((PostAdapter) _recyclelst_post.getAdapter()).getItem(position).url.endsWith(".jpg") ||
+                        ((PostAdapter) _recyclelst_post.getAdapter()).getItem(position).url.endsWith(".png")  ) {
+                    state = 3;
+                }
+                else if (((PostAdapter) _recyclelst_post.getAdapter()).getItem(position).url.endsWith(".gif") ||
+                        ((PostAdapter) _recyclelst_post.getAdapter()).getItem(position).url.endsWith(".gifv") ) {
+                   // Enleve le v de gifv
+                    if (url.charAt(url.length()-1)=='v') {
+                        url = url.replace(url.substring(url.length() - 1), "");
+                        state = 3;
+                    }
+                }
+                else {
+                    state = 2;
                 }
 
-                fullImage.setVisibility(View.VISIBLE);
-                imageIsFullscreen = true;
+                switch (state) {
+                    // Image View (Pas utilisé)
+                    case 1:
+                        fullImage.setVisibility(View.VISIBLE);
+                        new ImageLoader(fullImage, (ProgressBar) findViewById(R.id.imgProgress), R.drawable.ic_action_alert_warning)
+                                .execute((((PostAdapter) _recyclelst_post.getAdapter()).getItem(position).preview.images.get(0).source.url));
+                        break;
+                    // Page web
+                    case 2:
+                        fullWeb.setVerticalScrollBarEnabled(true);
+                        fullWeb.setHorizontalScrollBarEnabled(true);
 
-                new ImageLoader(fullImage, poste.progressBar, R.drawable.ic_action_alert_warning).execute((((PostAdapter) _recyclelst_post.getAdapter()).getItem(position).preview.images.get(0).source.url));
+                        fullWeb.loadUrl(url);
+                        fullWeb.setVisibility(View.VISIBLE);
+                        fullWeb.setBackgroundColor(Color.WHITE);
+                        break;
+                    // Image web
+                    case 3:
+                        fullWeb.setVerticalScrollBarEnabled(false);
+                        fullWeb.setHorizontalScrollBarEnabled(false);
 
-                dimBackground.setBackgroundColor(Color.parseColor("#bf000000"));
-
+                        String data = "<body><center><img height=\"100%\" src=\"" + url + "\" /></center></body></html>";
+                        fullWeb.loadData(data, "text/html", null);
+                        fullWeb.setVisibility(View.VISIBLE);
+                        break;
+                    default:
+                        break;
+                }
             }
 
             @Override
@@ -327,7 +392,8 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
             public void onDoubleTap(View view, int position) {
 
             }
-        }));    }
+        }));
+    }
 
     /**
      * Initialise le drawer de navigation.
@@ -336,12 +402,12 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
 
         //On va g�rer sa diff�rament c'est juste pour tester.
         List<DrawerItem> drawerMenuItem = new ArrayList<DrawerItem>();
-        drawerMenuItem.add(new DrawerItem("Front Page","https://www.reddit.com",R.drawable.ic_action_trending_up));
-        drawerMenuItem.add(new DrawerItem("/r/programming","https://www.reddit.com/r/programming",R.drawable.ic_action_trending_up));
-        drawerMenuItem.add(new DrawerItem("/r/gonewild","https://www.reddit.com/r/gonewild",R.drawable.ic_action_trending_up));
-        drawerMenuItem.add(new DrawerItem("/r/funny","https://www.reddit.com/r/funny",R.drawable.ic_action_trending_up));
-        drawerMenuItem.add(new DrawerItem("/r/aww","https://www.reddit.com/r/aww",R.drawable.ic_action_trending_up));
-        drawerMenuItem.add(new DrawerItem("/r/ama","https://www.reddit.com/r/ama",R.drawable.ic_action_trending_up));
+        drawerMenuItem.add(new DrawerItem("Front Page", "https://www.reddit.com", R.drawable.ic_action_trending_up));
+        drawerMenuItem.add(new DrawerItem("/r/programming", "https://www.reddit.com/r/programming", R.drawable.ic_action_trending_up));
+        drawerMenuItem.add(new DrawerItem("/r/gonewild", "https://www.reddit.com/r/gonewild", R.drawable.ic_action_trending_up));
+        drawerMenuItem.add(new DrawerItem("/r/funny", "https://www.reddit.com/r/funny", R.drawable.ic_action_trending_up));
+        drawerMenuItem.add(new DrawerItem("/r/aww", "https://www.reddit.com/r/aww", R.drawable.ic_action_trending_up));
+        drawerMenuItem.add(new DrawerItem("/r/ama", "https://www.reddit.com/r/ama", R.drawable.ic_action_trending_up));
 
 
         //On assigne le recycler � la vue,
@@ -351,7 +417,7 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
 
         //Cr�ation de l'adapteur.
 
-        mDrawerAdapter = new DrawerAdapter(drawerMenuItem,this);
+        mDrawerAdapter = new DrawerAdapter(drawerMenuItem, this);
         mDrawerRecyclerView.setAdapter(mDrawerAdapter);
 
         //Cr�ation du layout manager pour g�rer le drawer
@@ -367,7 +433,7 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
     }
 
     /**
-     * 
+     *
      */
     public void commencerRafraichissement() {
         String url = mCurrentSubreddit.equals("Front Page") ? "" : mCurrentSubreddit;
@@ -420,9 +486,13 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
     public void onBackPressed() {
 
         // Si l'image est full screen, on la rends visible
-        if (imageIsFullscreen) {
-            fullImage.setVisibility(View.INVISIBLE);
-            imageIsFullscreen = false;
+        if (contentIsFullScreen) {
+            fullImage.setVisibility(View.GONE);
+            fullWeb.setVisibility(View.GONE);
+            fullWeb.loadUrl("About::Blank");
+            // fullWeb.destroy();
+            contentIsFullScreen = false;
+            dimBackground.setVisibility(View.GONE);
         }
         //Si le drawer est ouvert on le ferme
         else if (mDrawerLayout.isDrawerOpen(mDrawerRecyclerView))
@@ -553,7 +623,8 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
 
     public void onImageClick(View v) {
         fullImage.setVisibility(View.INVISIBLE);
-        dimBackground.setBackgroundColor(Color.parseColor("#00FFFFFF"));
-
+        fullWeb.setVisibility(View.GONE);
+        fullWeb.loadUrl("about:blank");
+        dimBackground.setVisibility(View.GONE);
     }
 }

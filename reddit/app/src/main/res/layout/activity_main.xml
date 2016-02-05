@@ -78,11 +78,16 @@
             android:layout_column="0"
             android:layout_row="1">
 
-            <ImageView
-                android:layout_width="fill_parent"
-                android:layout_height="fill_parent"
-                android:id="@+id/dimBackground"
-                android:layout_gravity="center" />
+            <WebView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:id="@+id/fullWeb"
+                android:layout_marginLeft="40dp"
+                android:layout_marginRight="40dp"
+                android:layout_marginTop="25dp"
+                android:layout_marginBottom="25dp"
+                android:visibility="gone"
+                android:translationZ="20dp"/>
 
             <ImageView
                 android:id="@+id/fullImage"
@@ -100,11 +105,20 @@
                 android:src="@drawable/avatar"
                 android:translationZ="20dp"
                 android:visibility="invisible" />
+
+            <ImageView
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:id="@+id/dimBackground"
+                android:visibility="gone"
+                android:layout_gravity="center"
+                android:onClick="onImageClick"
+                android:background="#b6000000" />
         </FrameLayout>
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/DrawerRecycler"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_below="@+id/navigationHeader"
         android:layout_gravity="left"
