@@ -81,7 +81,6 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
         protected TextView tvTitle;
         protected TextView tvSubreddit;
         protected ImageView imgImage;
-        protected TextView tvUser;
         protected ProgressBar progressBar;
         protected FrontPage.Data.Children imagePost;
 

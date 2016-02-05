@@ -1,12 +1,8 @@
 package com.example.reddit;
 
-import android.annotation.TargetApi;
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.graphics.Color;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Build;
 import android.support.v4.widget.DrawerLayout;
@@ -17,24 +13,17 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.text.style.BackgroundColorSpan;
 import android.support.v7.widget.Toolbar;
 import android.view.KeyEvent;
 import android.view.Menu;
-import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
-import android.widget.FrameLayout;
 import android.widget.GridLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
-import android.widget.TableLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -43,7 +32,6 @@ import com.example.reddit.drawer.DrawerCallbacks;
 import com.example.reddit.drawer.DrawerItem;
 import com.example.reddit.utilities.*;
 import com.example.reddit.utilities.ImageLoader;
-import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.loopj.android.http.JsonHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
@@ -68,12 +56,14 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
 
     private LinearLayoutManager linearLayoutManager;
     private LinearLayout linearLayout;
+    private RecyclerView.LayoutManager mDrawerLayoutManager;
+
     //Drawer
     private RecyclerView mDrawerRecyclerView;
     private RecyclerView.Adapter mDrawerAdapter;
     private DrawerLayout mDrawerLayout;
     private ActionBarDrawerToggle mActionBarDrawerToggleToggle;
-    private RecyclerView.LayoutManager mDrawerLayoutManager;
+
 
     // DerniereURL utilise
     private String mCurrentSubreddit;
@@ -87,7 +77,6 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
     // Fullscreen image
     private ImageView fullImage;
     private boolean imageIsFullscreen;
-    private DrawerLayout drawerLayout;
     private ImageView dimBackground;
 
     /**
@@ -276,6 +265,14 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
                     url += "?after=" + mProchainePage;
 
                     WebServiceClient.get(url, new RequestParams(), new JsonHttpResponseHandler() {
+                        /**
+                         *
+                         * Override pour défénir les actions si la requête est un échec
+                         *
+                         * @param statusCode Le code de status de la requête web.
+                         * @param headers L'entête de la requête web
+                         * @param response La réponse
+                         */
                         @Override
                         public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                             FrontPage fp = new GsonBuilder().create().fromJson(response.toString(), FrontPage.class);
@@ -284,6 +281,15 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
                             for (FrontPage.Data.Children c : fp.data.children)
                                 ((PostAdapter) _recyclelst_post.getAdapter()).addItem(c);
                         }
+                        /**
+                         *
+                         * Override pour défénir les actions si la requête est un échec
+                         *
+                         * @param statusCode Le code de status de la requête web.
+                         * @param headers L'entête de la requête web
+                         * @param throwable Wrapper l'information de l'erreur
+                         * @param errorResponse Le message d'erreur
+                         */
                         @Override
                         public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
                             Toast.makeText(getApplicationContext(), "Error while parsing server data", Toast.LENGTH_LONG);
@@ -323,9 +329,20 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
 
             }
 
+            /**
+             *
+             * Sur le double tap on affiche les commentaires
+             *
+             * @param view La vue
+             * @param position La position
+             */
             @Override
             public void onDoubleTap(View view, int position) {
+                Intent intent = new Intent(getApplicationContext(),CommentsActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
+                intent.putExtra("postId",((PostAdapter)_recyclelst_post.getAdapter()).getItem(position).id);
+                startActivity(intent);
             }
         }));
     }
@@ -351,7 +368,6 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
         mDrawerRecyclerView.setHasFixedSize(true);
 
         //Cr�ation de l'adapteur.
-
         mDrawerAdapter = new DrawerAdapter(drawerMenuItem,this);
         mDrawerRecyclerView.setAdapter(mDrawerAdapter);
 
@@ -428,6 +444,7 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
         //Si le drawer est ouvert on le ferme
         else if (mDrawerLayout.isDrawerOpen(mDrawerRecyclerView))
             mDrawerLayout.closeDrawer(mDrawerRecyclerView);
+        //Si la recherche est active on la désactive
         else if (mIsSearchActive)
             disableSearchMenu();
         else
@@ -488,7 +505,7 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
         actionBar.setDisplayShowCustomEnabled(false);
         actionBar.setDisplayShowTitleEnabled(true);
 
-        //On enleve le focus au text box
+        //On enl�ve le focus au text box
         mSearchBox.clearFocus();
         View view = this.getCurrentFocus();
         //On masque le clavier tactil
@@ -503,7 +520,7 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
     }
 
     /**
-     *
+     * Fait une recherche sur le site de reddit afin d'obtenir les posts répondant au critère de recherche
      */
     private void doSearch() {
         if (mCurrentSubreddit != null) {
@@ -515,6 +532,14 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
 
             WebServiceClient.get(mCurrentSubreddit + "/search.json", requestParams, new JsonHttpResponseHandler() {
 
+                /**
+                 *
+                 * Override pour définir les actions quand la requête est ok
+                 *
+                 * @param statusCode Le code de status de la requête web.
+                 * @param headers L'entête de la requête web
+                 * @param response La réponson
+                 */
                 @Override
                 public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                     FrontPage fp = new GsonBuilder().create().fromJson(response.toString(), FrontPage.class);
@@ -522,6 +547,15 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
                     _swipe_layout.setRefreshing(false);
                 }
 
+                /**
+                 *
+                 * Override pour défénir les actions si la requête est un échec
+                 *
+                 * @param statusCode Le code de status de la requête web.
+                 * @param headers L'entête de la requête web
+                 * @param throwable Wrapper l'information de l'erreur
+                 * @param errorResponse Le message d'erreur
+                 */
                 @Override
                 public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
                     Toast.makeText(getApplicationContext(), "Error while parsing server data", Toast.LENGTH_LONG);
@@ -529,6 +563,7 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
                 }
             });
         } else {
+            //Ajoutes les paramètres de recherche.
             RequestParams requestParams = new RequestParams();
             requestParams.add("q", mSearchBox.getText().toString());
             requestParams.add("restrict_sr", "off");
@@ -536,6 +571,14 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
             requestParams.add("t", "all");
             WebServiceClient.get("/search.json", requestParams, new JsonHttpResponseHandler() {
 
+                /**
+                 *
+                 * Override pour définir les actions quand la requête est ok
+                 *
+                 * @param statusCode Le code de status de la requête web.
+                 * @param headers L'entête de la requête web
+                 * @param response La réponson
+                 */
                 @Override
                 public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                     FrontPage fp = new GsonBuilder().create().fromJson(response.toString(), FrontPage.class);
@@ -543,6 +586,15 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
                     _swipe_layout.setRefreshing(false);
                 }
 
+                /**
+                 *
+                 * Override pour défénir les actions si la requête est un échec
+                 *
+                 * @param statusCode Le code de status de la requête web.
+                 * @param headers L'entête de la requête web
+                 * @param throwable Wrapper l'information de l'erreur
+                 * @param errorResponse Le message d'erreur
+                 */
                 @Override
                 public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
                     Toast.makeText(getApplicationContext(), "Error while parsing server data", Toast.LENGTH_LONG);
