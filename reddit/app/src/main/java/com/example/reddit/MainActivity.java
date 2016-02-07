@@ -639,7 +639,7 @@ allerProchainePage();
      * Fait une recherche sur le site de reddit afin d'obtenir les posts répondant au critère de recherche
      */
     private void lancerLaRecherche() {
-        String searchQuery = mBoiteRecherche.getText().toString();
+	String url = mSubredditCourrant.equals("Front Page") ? "" : mSubredditCourrant;
 
         //Permet d'accéder a un subreddit
         if(searchQuery.contains("/r/"))
@@ -648,7 +648,7 @@ allerProchainePage();
             setTitle(mSubredditCourrant + mFiltreCourrant);
             commencerRafraichissement();
         }
-        else if (mSubredditCourrant != null) {
+        else if (!mSubredditCourrant.equals("Front Page")) {
             RequestParams requestParams = new RequestParams();
             requestParams.add("q", searchQuery);
             requestParams.add("restrict_sr", "on");
@@ -668,6 +668,7 @@ allerProchainePage();
                 @Override
                 public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                     FrontPage fp = new GsonBuilder().create().fromJson(response.toString(), FrontPage.class);
+                    mProchainePage = fp.data.after;
 
                     // Si on a desactiver les post NSFW
                     if(PreferencesManager.getInstance().getPreference(Settings.NSFW_key).equals("Off")) {
@@ -719,6 +720,18 @@ allerProchainePage();
                 @Override
                 public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                     FrontPage fp = new GsonBuilder().create().fromJson(response.toString(), FrontPage.class);
+                    mProchainePage = fp.data.after;
+
+                    // Si on a desactiver les post NSFW
+                    if(PreferencesManager.getInstance().getPreference(Settings.NSFW_key).equals("Off")) {
+                        ArrayList<FrontPage.Data.Children> lstToRemove = new ArrayList<>();
+
+                        for (int i = 0; i < fp.data.children.size(); i++)
+                            if (fp.data.children.get(i).data.over_18)
+                                lstToRemove.add(fp.data.children.get(i));
+
+                        fp.data.children.removeAll(lstToRemove);
+                    }
                     _recyclelst_post.setAdapter(new PostAdapter(fp.data.children, isGrid));
                     _swipe_layout.setRefreshing(false);
                 }
