@@ -27,7 +27,7 @@ public class CommentsActivity extends AppCompatActivity {
         String postId = intent.getStringExtra("postId");
 
         initialiserToolbar();
-        displayPostComments(postId);
+        afficherCommentaires(postId);
     }
 
 
@@ -44,13 +44,13 @@ public class CommentsActivity extends AppCompatActivity {
 
     /**
      *
-     * Affiche les commentaires associés au post
+     * Affiche les commentaires associés au post dans une webview
      *
      * @param postId Le id du post
      */
-    private void displayPostComments(String postId) {
+    private void afficherCommentaires(String postId) {
         WebView webview = (WebView)findViewById(R.id.webView);
-        webview.getSettings().setJavaScriptEnabled(true); // enable javascript
+        webview.getSettings().setJavaScriptEnabled(true);
         webview.setWebViewClient(new WebViewClient() {
             public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
                 Toast.makeText(CommentsActivity.this, "Impossible d'afficher les commentaires.", Toast.LENGTH_SHORT).show();

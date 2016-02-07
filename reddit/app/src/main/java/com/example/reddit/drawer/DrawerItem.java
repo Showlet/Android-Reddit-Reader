@@ -42,7 +42,7 @@ public class DrawerItem {
      *
      * @return L'url pour accéder au subreddit.
      */
-    public String getmUrl() {
+    public String getUrl() {
         return mUrl;
     }
 }

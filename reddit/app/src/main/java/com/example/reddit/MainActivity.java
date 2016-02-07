@@ -1,14 +1,11 @@
 package com.example.reddit;
 
-import android.app.Activity;
+
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Build;
-import android.provider.CalendarContract;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBar;
@@ -18,14 +15,12 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.view.Display;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
-import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.EditText;
@@ -35,7 +30,6 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.example.reddit.drawer.DrawerAdapter;
 import com.example.reddit.drawer.DrawerCallbacks;
 import com.example.reddit.drawer.DrawerItem;
@@ -47,12 +41,9 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.gson.GsonBuilder;
 import com.loopj.android.http.JsonHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
-
 import org.json.JSONObject;
-
 import java.util.ArrayList;
 import java.util.List;
-
 import cz.msebera.android.httpclient.Header;
 
 public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
@@ -60,11 +51,11 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
     private SwipeRefreshLayout _swipe_layout;
 
     //Toolbar
-    private Toolbar toolbar;
-    private MenuItem mSearchAction;
-    private MenuItem mFilterAction;
-    private EditText mSearchBox;
-    private boolean mIsSearchActive;
+    private Toolbar mToolbar;
+    private MenuItem mActionRecherche;
+    private MenuItem mActionFiltre;
+    private EditText mBoiteRecherche;
+    private boolean mIsRechercheActive;
 
     private LinearLayoutManager linearLayoutManager;
     private LinearLayout linearLayout;
@@ -78,8 +69,8 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
 
 
     // DerniereURL utilise
-    private String mCurrentSubreddit;
-    private String mCurrentFilter;
+    private String mSubredditCourrant;
+    private String mFiltreCourrant;
     private String mProchainePage;
 
     //GridLayout
@@ -94,7 +85,7 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
     private GoogleApiClient client;
 
     /**
-     * � la cr�ation de l'activit� (NO SHIT)
+     * À la création de l'activité (NO SHIT)
      *
      * @param savedInstanceState
      */
@@ -115,8 +106,8 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
         // isGrid est la variable qui mets l'affichage en gridview ou en list.
         String interfaceType = PreferencesManager.getInstance().getPreference(Settings.INTERFACE_KEY);
         isGrid = (interfaceType.equals("Grid"));
-        mCurrentSubreddit = "Front Page";
-        mCurrentFilter = "/hot";
+        mSubredditCourrant = "Front Page";
+        mFiltreCourrant = "/hot";
 
 
         //Active le http caching
@@ -137,7 +128,7 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
     }
 
     /**
-     * Apr�s la cr�ation de l'activit� (NO SHIT)
+     * Après la création de l'activité (NO SHIT)
      *
      * @param savedInstanceState
      */
@@ -150,7 +141,7 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
     }
 
     /**
-     * � la cr�ation des options du menu (Toolbar) (NO SHIT)
+     * � la création des options du menu (Toolbar) (NO SHIT)
      *
      * @param menu
      * @return super.onCreateOptionsMenu(menu)
@@ -159,15 +150,15 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
     public boolean onCreateOptionsMenu(Menu menu) {
         // On inflate le menu. Si l'action bar est pr�sente, on va rajouter les items
         getMenuInflater().inflate(R.menu.action_bar_menu, menu);
-        mSearchAction = menu.findItem(R.id.action_search);
-        mFilterAction = menu.findItem(R.id.action_filter);
+        mActionRecherche = menu.findItem(R.id.action_search);
+        mActionFiltre = menu.findItem(R.id.action_filter);
         return super.onCreateOptionsMenu(menu);
     }
 
     /**
-     * � la s�lection d'un item du menu (NO SHIT)
+     * À la sélection d'un item du menu (NO SHIT)
      *
-     * @param item l'item s�lectionn�
+     * @param item l'item sélectionné
      * @return super.onOptionsItemSelected(item)
      */
     @Override
@@ -178,27 +169,27 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
             case R.id.action_filter:
                 return true;
             case R.id.action_filter_hot:
-                mCurrentFilter = "/hot";
-                mFilterAction.getSubMenu().findItem(R.id.action_filter_new).setChecked(false);
-                mFilterAction.getSubMenu().findItem(R.id.action_filter_rising).setChecked(false);
+                mFiltreCourrant = "/hot";
+                mActionFiltre.getSubMenu().findItem(R.id.action_filter_new).setChecked(false);
+                mActionFiltre.getSubMenu().findItem(R.id.action_filter_rising).setChecked(false);
                 item.setChecked(true);
-                setTitle(mCurrentSubreddit + mCurrentFilter);
+                setTitle(mSubredditCourrant + mFiltreCourrant);
                 commencerRafraichissement();
                 return true;
             case R.id.action_filter_new:
-                mCurrentFilter = "/new";
-                mFilterAction.getSubMenu().findItem(R.id.action_filter_hot).setChecked(false);
-                mFilterAction.getSubMenu().findItem(R.id.action_filter_rising).setChecked(false);
+                mFiltreCourrant = "/new";
+                mActionFiltre.getSubMenu().findItem(R.id.action_filter_hot).setChecked(false);
+                mActionFiltre.getSubMenu().findItem(R.id.action_filter_rising).setChecked(false);
                 item.setChecked(true);
-                setTitle(mCurrentSubreddit + mCurrentFilter);
+                setTitle(mSubredditCourrant + mFiltreCourrant);
                 commencerRafraichissement();
                 return true;
             case R.id.action_filter_rising:
-                mCurrentFilter = "/rising";
-                mFilterAction.getSubMenu().findItem(R.id.action_filter_new).setChecked(false);
-                mFilterAction.getSubMenu().findItem(R.id.action_filter_hot).setChecked(false);
+                mFiltreCourrant = "/rising";
+                mActionFiltre.getSubMenu().findItem(R.id.action_filter_new).setChecked(false);
+                mActionFiltre.getSubMenu().findItem(R.id.action_filter_hot).setChecked(false);
                 item.setChecked(true);
-                setTitle(mCurrentSubreddit + mCurrentFilter);
+                setTitle(mSubredditCourrant + mFiltreCourrant);
                 commencerRafraichissement();
                 return true;
             case R.id.action_settings:
@@ -206,21 +197,21 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
                 startActivity(intent);
                 return true;
             case R.id.action_search:
-                if (mIsSearchActive)
-                    disableSearchMenu();
+                if (mIsRechercheActive)
+                    desactiverMenuDeRecherche();
                 else
-                    enableSearchMenu();
+                    activerMenuDeRecherche();
                 return true;
         }
         return super.onOptionsItemSelected(item);
     }
 
     /**
-     * Initialise la toolbar. Elle est ajout�e et attach�e au layout
+     * Initialise la toolbar. Elle est ajoutée et attachée au layout
      */
     private void initialiserToolbar() {
-        toolbar = (Toolbar) findViewById(R.id.action_bar);
-        setSupportActionBar(toolbar);
+        mToolbar = (Toolbar) findViewById(R.id.action_bar);
+        setSupportActionBar(mToolbar);
     }
 
     /**
@@ -281,8 +272,8 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
                     //Scroll at Top
                 } else if (!recyclerView.canScrollVertically(1)) {
                     //Scroll at bottom
-                    String url = mCurrentSubreddit.equals("Front Page") ? "" : mCurrentSubreddit;
-                    url += mCurrentFilter;
+                    String url = mSubredditCourrant.equals("Front Page") ? "" : mSubredditCourrant;
+                    url += mFiltreCourrant;
                     url += ".json";
                     url += "?after=" + mProchainePage;
 
@@ -298,7 +289,7 @@ public class MainActivity extends AppCompatActivity implements DrawerCallbacks {
 
                         @Override
                         public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
-                            Toast.makeText(getApplicationContext(), "Error while parsing server data", Toast.LENGTH_LONG);
+                            Toast.makeText(getApplicationContext(), "Une erreur est survenue!", Toast.LENGTH_LONG);
                         }
                     });
 allerProchainePage();
@@ -402,10 +393,7 @@ allerProchainePage();
              */
             @Override
             public void onDoubleTap(View view, int position) {
-
                 Intent intent = new Intent(MainActivity.this,CommentsActivity.class);
-
-
                 intent.putExtra("postId", ((PostAdapter) _recyclelst_post.getAdapter()).getItem(position).id);
                 startActivity(intent);
             }
@@ -416,8 +404,7 @@ allerProchainePage();
      * Initialise le drawer de navigation.
      */
     private void initialiserDrawer() {
-
-        //On va g�rer sa diff�rament c'est juste pour tester.
+        //Ajoute les items par défaut.
         List<DrawerItem> drawerMenuItem = new ArrayList<DrawerItem>();
         drawerMenuItem.add(new DrawerItem("Front Page", "https://www.reddit.com", R.drawable.ic_action_trending_up));
         drawerMenuItem.add(new DrawerItem("/r/programming", "https://www.reddit.com/r/programming", R.drawable.ic_action_trending_up));
@@ -430,21 +417,23 @@ allerProchainePage();
         drawerMenuItem.add(new DrawerItem("/r/Randnsfw", "https://www.reddit.com/r/randnsfw", R.drawable.ic_action_trending_up));
 
 
-        //On assigne le recycler � la vue,
+        //On assigne le recycler à la vue,
         mDrawerRecyclerView = (RecyclerView) findViewById(R.id.DrawerRecycler);
+
         //La liste d'objet est de taille fixe. (On va peut-etre changer sa avec les favoris)
         mDrawerRecyclerView.setHasFixedSize(true);
 
-        //Cr�ation de l'adapteur.
-        mDrawerAdapter = new DrawerAdapter(drawerMenuItem, this);        mDrawerRecyclerView.setAdapter(mDrawerAdapter);
+        //Création de l'adapteur.
+        mDrawerAdapter = new DrawerAdapter(drawerMenuItem, this);
+        mDrawerRecyclerView.setAdapter(mDrawerAdapter);
 
-        //Cr�ation du layout manager pour g�rer le drawer
+        //Création du layout manager pour gérer le drawer
         mDrawerLayoutManager = new LinearLayoutManager(this);
         mDrawerRecyclerView.setLayoutManager(mDrawerLayoutManager);
 
         //On assigne le layout du drawer
         mDrawerLayout = (DrawerLayout) findViewById(R.id.DrawerLayout);
-        mActionBarDrawerToggleToggle = new ActionBarDrawerToggle(this, mDrawerLayout, toolbar, R.string.drawer_open, R.string.drawer_open);
+        mActionBarDrawerToggleToggle = new ActionBarDrawerToggle(this, mDrawerLayout, mToolbar, R.string.drawer_open, R.string.drawer_open);
 
         //Listener pour l'ouverture et la fermeture du drawer
         mDrawerLayout.setDrawerListener(mActionBarDrawerToggleToggle);
@@ -454,8 +443,8 @@ allerProchainePage();
      *
      */
     public void commencerRafraichissement() {
-        String url = mCurrentSubreddit.equals("Front Page") ? "" : mCurrentSubreddit;
-        url += mCurrentFilter;
+        String url = mSubredditCourrant.equals("Front Page") ? "" : mSubredditCourrant;
+        url += mFiltreCourrant;
         url += ".json";
 
         WebServiceClient.get(url, new RequestParams(), new JsonHttpResponseHandler() {
@@ -482,21 +471,21 @@ allerProchainePage();
 
             @Override
             public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
-                Toast.makeText(getApplicationContext(), "Error while parsing server data", Toast.LENGTH_LONG);
+                Toast.makeText(getApplicationContext(), "Une erreur est survenue!", Toast.LENGTH_LONG);
                 _swipe_layout.setRefreshing(false);
             }
         });
     }
 
     public void allerProchainePage() {
-        String url = mCurrentSubreddit.equals("Front Page") ? "" : mCurrentSubreddit;
-        url += mCurrentFilter;
+        String url = mSubredditCourrant.equals("Front Page") ? "" : mSubredditCourrant;
+        url += mFiltreCourrant;
         url += ".json";
         url += "?after=" + mProchainePage;
 
         WebServiceClient.get(url, new RequestParams(), new JsonHttpResponseHandler() {
             /**
-             * Override pour défénir les actions si la requête est un échec
+             * Override pour définir les actions si la requête est un succès
              *
              * @param statusCode Le code de status de la requête web.
              * @param headers L'entête de la requête web
@@ -516,7 +505,7 @@ allerProchainePage();
             }
 
             /**
-             * Override pour défénir les actions si la requête est un échec
+             * Override pour définir les actions si la requête est un échec
              *
              * @param statusCode Le code de status de la requête web.
              * @param headers L'entête de la requête web
@@ -525,34 +514,34 @@ allerProchainePage();
              */
             @Override
             public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
-                Toast.makeText(getApplicationContext(), "Error while parsing server data", Toast.LENGTH_LONG);
+                Toast.makeText(getApplicationContext(), "Une erreur est survenue!", Toast.LENGTH_LONG);
             }
         });
     }
 
     /**
-     * Permets de g�rer la sélection des items du drawer.
+     * Permets de gérer la sélection des items du drawer.
      *
-     * @param position La position s�lectionn�
+     * @param position La position sélectionnée
      */
     @Override
     public void onDrawerItemSelected(int position) {
 
-        //On ferme le drawer � la s�lection d'un item.
+        //On ferme le drawer à la sélection d'un item.
         if (mDrawerLayout != null) {
             mDrawerLayout.closeDrawer(mDrawerRecyclerView);
         }
 
-        //On g�re l'item s�lectionn�
-        ((DrawerAdapter) mDrawerAdapter).selectPosition(position);
-        mCurrentSubreddit = ((DrawerAdapter) mDrawerAdapter).getItem(position).getText();
-        mCurrentFilter = "/hot";
-        setTitle(mCurrentSubreddit + mCurrentFilter);
+        //On gère l'item sélectionné
+        ((DrawerAdapter) mDrawerAdapter).selectionnerPosition(position);
+        mSubredditCourrant = ((DrawerAdapter) mDrawerAdapter).getItem(position).getText();
+        mFiltreCourrant = "/hot";
+        setTitle(mSubredditCourrant + mFiltreCourrant);
         commencerRafraichissement();
     }
 
     /**
-     * G�re les backPressed
+     * Gère les backPressed
      */
     @Override
     public void onBackPressed() {
@@ -570,17 +559,17 @@ allerProchainePage();
         else if (mDrawerLayout.isDrawerOpen(mDrawerRecyclerView))
             mDrawerLayout.closeDrawer(mDrawerRecyclerView);
             //Si la recherche est active on la désactive
-        else if (mIsSearchActive)
-            disableSearchMenu();
+        else if (mIsRechercheActive)
+            desactiverMenuDeRecherche();
         else
             super.onBackPressed();
     }
 
     /**
-     * M�thode qui active l'action de recherche dans la toolbar
+     * Méthode qui active l'action de recherche dans la toolbar
      */
 
-    private void enableSearchMenu() {
+    private void activerMenuDeRecherche() {
         //On retrouve l'action bar
         ActionBar actionBar = getSupportActionBar();
 
@@ -592,15 +581,15 @@ allerProchainePage();
         actionBar.setDisplayShowTitleEnabled(false);
 
         //On retrouve la vue de recherche.
-        mSearchBox = (EditText) actionBar.getCustomView().findViewById(R.id.searchBox);
+        mBoiteRecherche = (EditText) actionBar.getCustomView().findViewById(R.id.searchBox);
 
         //Ajout du listener pour trigger la recherche.
-        mSearchBox.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+        mBoiteRecherche.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 if (actionId == EditorInfo.IME_ACTION_SEARCH) {
-                    doSearch();
-                    disableSearchMenu();
+                    lancerLaRecherche();
+                    desactiverMenuDeRecherche();
                     return true;
                 }
                 return false;
@@ -608,22 +597,22 @@ allerProchainePage();
         });
 
         //On affiche l'icon de fermeture dans le textbox
-        mSearchAction.setIcon(R.drawable.ic_action_navigation_close);
+        mActionRecherche.setIcon(R.drawable.ic_action_navigation_close);
 
         //On donne le focus au textbox.
-        mSearchBox.requestFocus();
+        mBoiteRecherche.requestFocus();
 
         //On affiche le claver tactil
         InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-        inputMethodManager.showSoftInput(mSearchBox, InputMethodManager.SHOW_IMPLICIT);
+        inputMethodManager.showSoftInput(mBoiteRecherche, InputMethodManager.SHOW_IMPLICIT);
 
-        mIsSearchActive = true;
+        mIsRechercheActive = true;
     }
 
     /**
-     * M�thode qui d�sactive l'action de recherche dans la toolbar
+     * Méthode qui désactive l'action de recherche dans la toolbar
      */
-    private void disableSearchMenu() {
+    private void desactiverMenuDeRecherche() {
 
         //On retrouve l'action bar
         ActionBar actionBar = getSupportActionBar();
@@ -633,7 +622,7 @@ allerProchainePage();
         actionBar.setDisplayShowTitleEnabled(true);
 
         //On enl�ve le focus au text box
-        mSearchBox.clearFocus();
+        mBoiteRecherche.clearFocus();
         View view = this.getCurrentFocus();
         //On masque le clavier tactil
         InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
@@ -641,32 +630,32 @@ allerProchainePage();
 
 
         //On ajoute l'icon (loupe) de recherche
-        mSearchAction.setIcon(getResources().getDrawable(R.drawable.ic_action_search_white));
+        mActionRecherche.setIcon(getResources().getDrawable(R.drawable.ic_action_search_white));
 
-        mIsSearchActive = false;
+        mIsRechercheActive = false;
     }
 
     /**
      * Fait une recherche sur le site de reddit afin d'obtenir les posts répondant au critère de recherche
      */
-    private void doSearch() {
-        String searchQuery = mSearchBox.getText().toString();
+    private void lancerLaRecherche() {
+        String searchQuery = mBoiteRecherche.getText().toString();
 
         //Permet d'accéder a un subreddit
         if(searchQuery.contains("/r/"))
         {
-            mCurrentSubreddit = searchQuery;
-            setTitle(mCurrentSubreddit + mCurrentFilter);
+            mSubredditCourrant = searchQuery;
+            setTitle(mSubredditCourrant + mFiltreCourrant);
             commencerRafraichissement();
         }
-        else if (mCurrentSubreddit != null) {
+        else if (mSubredditCourrant != null) {
             RequestParams requestParams = new RequestParams();
             requestParams.add("q", searchQuery);
             requestParams.add("restrict_sr", "on");
             requestParams.add("sort", "relevance");
             requestParams.add("t", "all");
 
-            WebServiceClient.get(mCurrentSubreddit + "/search.json", requestParams, new JsonHttpResponseHandler() {
+            WebServiceClient.get(mSubredditCourrant + "/search.json", requestParams, new JsonHttpResponseHandler() {
 
                 /**
                  *
@@ -697,7 +686,7 @@ allerProchainePage();
 
                 /**
                  *
-                 * Override pour défénir les actions si la requête est un échec
+                 * Override pour définir les actions si la requête est un échec
                  *
                  * @param statusCode Le code de status de la requête web.
                  * @param headers L'entête de la requête web
@@ -706,7 +695,7 @@ allerProchainePage();
                  */
                 @Override
                 public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
-                    Toast.makeText(getApplicationContext(), "Error while parsing server data", Toast.LENGTH_LONG);
+                    Toast.makeText(getApplicationContext(), "Une erreur est survenue!", Toast.LENGTH_LONG);
                     _swipe_layout.setRefreshing(false);
                 }
             });
@@ -745,7 +734,7 @@ allerProchainePage();
                  */
                 @Override
                 public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
-                    Toast.makeText(getApplicationContext(), "Error while parsing server data", Toast.LENGTH_LONG);
+                    Toast.makeText(getApplicationContext(), "Une erreur est survenue!", Toast.LENGTH_LONG);
                     _swipe_layout.setRefreshing(false);
                 }
             });

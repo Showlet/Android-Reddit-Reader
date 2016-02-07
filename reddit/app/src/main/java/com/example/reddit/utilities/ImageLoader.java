@@ -39,7 +39,9 @@ public class ImageLoader extends AsyncTask<String, String, Bitmap> {
 
     /**
      *
-     * @param args
+     * Permets d'éffectuer la tache en arrière plan
+     *
+     * @param args Arguments
      * @return
      */
     protected Bitmap doInBackground(String... args) {

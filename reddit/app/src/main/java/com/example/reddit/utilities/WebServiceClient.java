@@ -1,21 +1,11 @@
 package com.example.reddit.utilities;
 
-/**
- * Created by Maxim on 12/6/2015.
- * This is used to make call to the webservice used to access our MySQL database server
- */
-
-import android.util.Log;
 
 import com.loopj.android.http.*;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import cz.msebera.android.httpclient.Header;
-
 /**
- *
+ * Created by Maxim on 12/6/2015.
+ * Wrapper sur la librairie loopj afin de faire des requêtes web (post/get)
  */
 public class WebServiceClient {
 
@@ -25,9 +15,11 @@ public class WebServiceClient {
 
     /**
      *
-     * @param url
-     * @param params
-     * @param responseHandler
+     * Fait un get sur l'url
+     *
+     * @param url l'url relative sur laquelle on fait une requêtes (sans l'url de base) ex: /getthis à la place de www.google.com/gethis
+     * @param params Les paramètres de la requête web
+     * @param responseHandler Le handler pour la réponse
      */
     public static void get(String url, RequestParams params, AsyncHttpResponseHandler responseHandler) {
         client.get(getAbsoluteUrl(url), params, responseHandler);
@@ -35,15 +27,19 @@ public class WebServiceClient {
 
     /**
      *
-     * @param url
-     * @param params
-     * @param responseHandler
+     * Fait un post sur l'url
+     *
+     * @param url l'url sur laquelle on fait une requêtes (sans l'url de base) ex: /getthis à la place de www.google.com/gethis
+     * @param params Les paramètres de la requête web
+     * @param responseHandler Le handler pour la réponse
      */
     public static void post(String url, RequestParams params, AsyncHttpResponseHandler responseHandler) {
         client.post(getAbsoluteUrl(url), params, responseHandler);
     }
 
     /**
+     *
+     * Retourne l'url absolue (base url + relative)
      *
      * @param relativeUrl
      * @return
