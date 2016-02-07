@@ -639,18 +639,19 @@ allerProchainePage();
      * Fait une recherche sur le site de reddit afin d'obtenir les posts répondant au critère de recherche
      */
     private void lancerLaRecherche() {
-	String url = mSubredditCourrant.equals("Front Page") ? "" : mSubredditCourrant;
+        String motclefRecherche = mBoiteRecherche.getText().toString();
+	    String url = mSubredditCourrant.equals("Front Page") ? "" : mSubredditCourrant;
 
         //Permet d'accéder a un subreddit
-        if(searchQuery.contains("/r/"))
+        if(motclefRecherche.contains("/r/"))
         {
-            mSubredditCourrant = searchQuery;
+            mSubredditCourrant = motclefRecherche;
             setTitle(mSubredditCourrant + mFiltreCourrant);
             commencerRafraichissement();
         }
         else if (!mSubredditCourrant.equals("Front Page")) {
             RequestParams requestParams = new RequestParams();
-            requestParams.add("q", searchQuery);
+            requestParams.add("q", motclefRecherche);
             requestParams.add("restrict_sr", "on");
             requestParams.add("sort", "relevance");
             requestParams.add("t", "all");
@@ -703,7 +704,7 @@ allerProchainePage();
         } else {
             //Ajoutes les paramètres de recherche.
             RequestParams requestParams = new RequestParams();
-            requestParams.add("q", searchQuery);
+            requestParams.add("q", motclefRecherche);
             requestParams.add("restrict_sr", "off");
             requestParams.add("sort", "relevance");
             requestParams.add("t", "all");
